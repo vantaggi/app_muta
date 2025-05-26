@@ -50,7 +50,7 @@ class ThemeProvider extends ChangeNotifier {
       case CeroType.sanGiorgio:
         return Icons.shield; // Simbolo per San Giorgio
       case CeroType.santAntonio:
-        return Icons.church; // Simbolo per Sant'Antonio
+        return Icons.local_fire_department; // Simbolo per Sant'Antonio
     }
   }
 

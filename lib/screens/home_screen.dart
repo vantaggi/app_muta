@@ -42,11 +42,13 @@ class HomeScreen extends StatelessWidget {
                               color: themeProvider.currentPrimaryColor,
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              'Benvenuto nel Cero di ${themeProvider.currentCeroName}',
+                      Expanded( // <--- Added Expanded
+                      child:Text(
+                              'Cero di ${themeProvider.currentCeroName}',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
+                            ),
                             ),
                           ],
                         ),
@@ -116,7 +118,11 @@ class HomeScreen extends StatelessWidget {
                             () => _navigateToTab(context, 1),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    // Use Padding instead of SizedBox for flexible spacing
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0), // Half of 12.0 on each side
+                      child: Container(), // An empty container for the padding
+                    ),
                     Expanded(
                       child: _buildQuickActionCard(
                         context,

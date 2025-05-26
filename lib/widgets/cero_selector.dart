@@ -43,7 +43,7 @@ class CeroSelector extends StatelessWidget {
       itemBuilder: (BuildContext context) => [
         _buildPopupMenuItem(CeroType.santUbaldo, "Sant'Ubaldo", Icons.star, Colors.yellow.shade700),
         _buildPopupMenuItem(CeroType.sanGiorgio, "San Giorgio", Icons.shield, Colors.blue.shade700),
-        _buildPopupMenuItem(CeroType.santAntonio, "Sant'Antonio", Icons.church, Colors.black),
+        _buildPopupMenuItem(CeroType.santAntonio, "Sant'Antonio", Icons.local_fire_department, Colors.black),
       ],
     );
   }
@@ -72,21 +72,23 @@ class CeroSelector extends StatelessWidget {
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max, // Changed to max to fill available width
         children: CeroType.values.map((cero) {
           final isSelected = themeProvider.currentCero == cero;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: GestureDetector(
-              onTap: () => themeProvider.changeCero(cero),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? _getCeroColor(cero) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
+          return Expanded( // Wrap each item in Expanded
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: GestureDetector(
+                onTap: () => themeProvider.changeCero(cero),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? _getCeroColor(cero) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       _getCeroIcon(cero),
@@ -95,16 +97,24 @@ class CeroSelector extends StatelessWidget {
                     ),
                     if (showFullName) ...[
                       const SizedBox(width: 4),
-                      Text(
-                        _getCeroName(cero),
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : _getCeroColor(cero),
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 12,
+                      // Wrap Text in FittedBox
+                      Flexible( // Still need Flexible to constrain FittedBox within the Row
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown, // Scale down, but don't scale up
+                          child: Text(
+                            _getCeroName(cero),
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : _getCeroColor(cero),
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 12, // This will be the max size
+                            ),
+                            maxLines: 1, // Ensure it stays on one line
+                          ),
                         ),
                       ),
                     ],
                   ],
+                ),
                 ),
               ),
             ),
@@ -132,7 +142,7 @@ class CeroSelector extends StatelessWidget {
       case CeroType.sanGiorgio:
         return Icons.shield;
       case CeroType.santAntonio:
-        return Icons.church;
+        return Icons.local_fire_department;
     }
   }
 

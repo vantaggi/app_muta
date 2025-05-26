@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:app_muta/screens/main_navigator.dart'; // Creeremo questo file tra poco
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:app_muta/screens/main_navigator.dart';
+import 'package:app_muta/theme/theme_provider.dart';
 
 void main() {
   runApp(const AppMuta());
@@ -11,13 +12,18 @@ class AppMuta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'App Muta',
-      // Definiamo un tema di partenza (es. Sant'Ubaldo)
-      // In futuro questo potrà cambiare dinamicamente
-      theme: AppTheme.getTheme(CeroType.santUbaldo),
-      debugShowCheckedModeBanner: false,
-      home: const MainNavigator(),
+    return ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'App Muta',
+            theme: themeProvider.currentTheme,
+            debugShowCheckedModeBanner: false,
+            home: const MainNavigator(),
+          );
+        },
+      ),
     );
   }
 }

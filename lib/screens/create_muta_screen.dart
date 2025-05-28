@@ -60,9 +60,9 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text('Crea Muta ${themeProvider.currentCeroName}'),
-            actions: [
+            actions: const [
               Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: EdgeInsets.only(right: 8.0),
                 child: CeroSelector(showAsPopup: true, showFullName: false),
               ),
             ],

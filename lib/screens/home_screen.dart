@@ -14,9 +14,9 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text('App Muta - ${themeProvider.currentCeroName}'),
-            actions: [
+            actions: const [
               Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: EdgeInsets.only(right: 8.0),
                 child: CeroSelector(showAsPopup: true, showFullName: false),
               ),
             ],

@@ -6,7 +6,7 @@ enum CeroType { santUbaldo, sanGiorgio, santAntonio }
 class AppTheme {
   // Colori base
   static final Color _rosso = Colors.red.shade700;
-  static final Color _bianco = Colors.white;
+  static const Color _bianco = Colors.white;
 
   // Temi specifici per ogni Cero
   static final ThemeData _santUbaldoTheme = ThemeData(

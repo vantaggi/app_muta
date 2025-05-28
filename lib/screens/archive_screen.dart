@@ -171,9 +171,9 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Archivio ${themeProvider.currentCeroName}'),
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: EdgeInsets.only(right: 8.0),
             child: CeroSelector(showAsPopup: true, showFullName: false),
           ),
         ],
@@ -319,7 +319,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                     if (comparisonResultData != null && comparisonResultData!.isNotEmpty)
                       _buildComparisonView(comparisonResultData!, themeProvider, selectedYear!, comparisonYear!),
                     if (displayedMute.isNotEmpty)
-                      ...displayedMute.map((muta) => _MutaDisplayCard(muta: muta, themeProvider: themeProvider)).toList(),
+                      ...displayedMute.map((muta) => _MutaDisplayCard(muta: muta, themeProvider: themeProvider)),
                   ],
                 ),
               ),
@@ -439,7 +439,7 @@ class _MutaDisplayCard extends StatelessWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

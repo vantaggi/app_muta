@@ -1,5 +1,6 @@
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:app_muta/theme/app_theme.dart'; // Per CeroType
 
+// L'enum RuoloMuta definisce la posizione lungo una singola stanga
 enum RuoloMuta {
   puntaAvanti,
   ceppoAvanti,
@@ -10,17 +11,24 @@ enum RuoloMuta {
 class PersonaMuta {
   final String nome;
   final String cognome;
-  final RuoloMuta ruolo;
+  final String? soprannome; // Nuovo campo
+  final RuoloMuta ruolo; // Il ruolo della persona sulla sua stanga
   final String? note;
 
   PersonaMuta({
     required this.nome,
     required this.cognome,
+    this.soprannome,
     required this.ruolo,
     this.note,
   });
 
-  String get nomeCompleto => '$nome $cognome';
+  String get nomeCompleto {
+    if (soprannome != null && soprannome!.isNotEmpty) {
+      return '$nome "$soprannome" $cognome';
+    }
+    return '$nome $cognome';
+  }
 
   String get ruoloDescrizione {
     switch (ruolo) {
@@ -39,6 +47,7 @@ class PersonaMuta {
     return {
       'nome': nome,
       'cognome': cognome,
+      'soprannome': soprannome,
       'ruolo': ruolo.index,
       'note': note,
     };
@@ -48,70 +57,91 @@ class PersonaMuta {
     return PersonaMuta(
       nome: json['nome'],
       cognome: json['cognome'],
+      soprannome: json['soprannome'],
       ruolo: RuoloMuta.values[json['ruolo']],
       note: json['note'],
     );
   }
+
+  // Helper per confronto
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is PersonaMuta &&
+              runtimeType == other.runtimeType &&
+              nome == other.nome &&
+              cognome == other.cognome &&
+              soprannome == other.soprannome &&
+              ruolo == other.ruolo;
+
+  @override
+  int get hashCode => nome.hashCode ^ cognome.hashCode ^ soprannome.hashCode ^ ruolo.hashCode;
 }
 
 class Muta {
   final String id;
   final CeroType cero;
-  final int numeroMuta;
-  final String posizione; // es. "Via del Corso, 15"
-  final List<PersonaMuta> persone;
+  final String nomeMuta; // Sostituisce numeroMuta
+  final String posizione; // Può essere un riferimento geografico più specifico
+
+  // Liste separate per le stanghe
+  final List<PersonaMuta> stangaSinistra;
+  final List<PersonaMuta> stangaDestra;
+
   final DateTime dataCreazione;
   final DateTime? dataModifica;
   final int anno;
-  final String? note;
+  final String? note; // Note generali per la muta
   final bool verificata;
-  final int? numeroVerifiche; // Quante volte è stata confermata da utenti diversi
+  final int? numeroVerifiche;
 
   Muta({
     required this.id,
     required this.cero,
-    required this.numeroMuta,
+    required this.nomeMuta,
     required this.posizione,
-    required this.persone,
+    required this.stangaSinistra,
+    required this.stangaDestra,
     required this.dataCreazione,
     this.dataModifica,
     required this.anno,
     this.note,
     this.verificata = false,
     this.numeroVerifiche = 0,
-  });
+  }) {
+    assert(stangaSinistra.length == 4, 'La stanga sinistra deve avere 4 persone.');
+    assert(stangaDestra.length == 4, 'La stanga destra deve avere 4 persone.');
+    // Potresti aggiungere controlli per assicurarti che i ruoli siano unici e corretti per stanga
+  }
 
-  // Verifica se la muta è completa (8 persone, 2 per ogni ruolo)
   bool get isCompleta {
-    if (persone.length != 8) return false;
-
-    final ruoliCount = <RuoloMuta, int>{};
-    for (final persona in persone) {
-      ruoliCount[persona.ruolo] = (ruoliCount[persona.ruolo] ?? 0) + 1;
-    }
-
-    return ruoliCount[RuoloMuta.puntaAvanti] == 2 &&
-        ruoliCount[RuoloMuta.ceppoAvanti] == 2 &&
-        ruoliCount[RuoloMuta.ceppoDietro] == 2 &&
-        ruoliCount[RuoloMuta.puntaDietro] == 2;
+    if (stangaSinistra.length != 4 || stangaDestra.length != 4) return false;
+    // Verifica che ogni stanga abbia i 4 ruoli distinti
+    final ruoliSinistra = stangaSinistra.map((p) => p.ruolo).toSet();
+    final ruoliDestra = stangaDestra.map((p) => p.ruolo).toSet();
+    return ruoliSinistra.length == 4 && ruoliDestra.length == 4;
   }
 
-  // Ottieni le persone per ruolo
+  // Ottiene la persona per un ruolo specifico su una data stanga
+  PersonaMuta? getPersonaPerRuoloEStanga(RuoloMuta ruolo, bool isSinistra) {
+    final stanga = isSinistra ? stangaSinistra : stangaDestra;
+    try {
+      return stanga.firstWhere((p) => p.ruolo == ruolo);
+    } catch (e) {
+      return null; // Nessuna persona per quel ruolo su quella stanga
+    }
+  }
+
+  // Ottiene le due persone (una per stanga) per un dato ruolo
   List<PersonaMuta> getPersonePerRuolo(RuoloMuta ruolo) {
-    return persone.where((p) => p.ruolo == ruolo).toList();
+    List<PersonaMuta> risultato = [];
+    final pSinistra = getPersonaPerRuoloEStanga(ruolo, true);
+    if (pSinistra != null) risultato.add(pSinistra);
+    final pDestra = getPersonaPerRuoloEStanga(ruolo, false);
+    if (pDestra != null) risultato.add(pDestra);
+    return risultato;
   }
 
-  // Ottieni tutte le persone ordinate per posizione (ordine di marcia)
-  List<PersonaMuta> get personeOrdinate {
-    final ordinate = <PersonaMuta>[];
-
-    // Ordine di marcia: punta avanti, ceppo avanti, ceppo dietro, punta dietro
-    for (final ruolo in RuoloMuta.values) {
-      ordinate.addAll(getPersonePerRuolo(ruolo));
-    }
-
-    return ordinate;
-  }
 
   String get ceroNome {
     switch (cero) {
@@ -128,9 +158,10 @@ class Muta {
     return {
       'id': id,
       'cero': cero.index,
-      'numeroMuta': numeroMuta,
+      'nomeMuta': nomeMuta,
       'posizione': posizione,
-      'persone': persone.map((p) => p.toJson()).toList(),
+      'stangaSinistra': stangaSinistra.map((p) => p.toJson()).toList(),
+      'stangaDestra': stangaDestra.map((p) => p.toJson()).toList(),
       'dataCreazione': dataCreazione.millisecondsSinceEpoch,
       'dataModifica': dataModifica?.millisecondsSinceEpoch,
       'anno': anno,
@@ -144,9 +175,12 @@ class Muta {
     return Muta(
       id: json['id'],
       cero: CeroType.values[json['cero']],
-      numeroMuta: json['numeroMuta'],
+      nomeMuta: json['nomeMuta'],
       posizione: json['posizione'],
-      persone: (json['persone'] as List)
+      stangaSinistra: (json['stangaSinistra'] as List)
+          .map((p) => PersonaMuta.fromJson(p))
+          .toList(),
+      stangaDestra: (json['stangaDestra'] as List)
           .map((p) => PersonaMuta.fromJson(p))
           .toList(),
       dataCreazione: DateTime.fromMillisecondsSinceEpoch(json['dataCreazione']),
@@ -160,13 +194,13 @@ class Muta {
     );
   }
 
-  // Crea una copia della muta con modifiche
   Muta copyWith({
     String? id,
     CeroType? cero,
-    int? numeroMuta,
+    String? nomeMuta,
     String? posizione,
-    List<PersonaMuta>? persone,
+    List<PersonaMuta>? stangaSinistra,
+    List<PersonaMuta>? stangaDestra,
     DateTime? dataCreazione,
     DateTime? dataModifica,
     int? anno,
@@ -177,9 +211,10 @@ class Muta {
     return Muta(
       id: id ?? this.id,
       cero: cero ?? this.cero,
-      numeroMuta: numeroMuta ?? this.numeroMuta,
+      nomeMuta: nomeMuta ?? this.nomeMuta,
       posizione: posizione ?? this.posizione,
-      persone: persone ?? this.persone,
+      stangaSinistra: stangaSinistra ?? this.stangaSinistra,
+      stangaDestra: stangaDestra ?? this.stangaDestra,
       dataCreazione: dataCreazione ?? this.dataCreazione,
       dataModifica: dataModifica ?? this.dataModifica,
       anno: anno ?? this.anno,

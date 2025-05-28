@@ -18,46 +18,90 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
   final List<int> availableYears = List.generate(15, (index) => DateTime.now().year - index); // Ultimi 15 anni
 
-  // Dati Mock - SOSTITUIRE CON FETCH DA DATABASE (es. Firebase)
-  // Utilizza i modelli Muta e PersonaMuta
+  // Dati Mock Aggiornati - SOSTITUIRE CON FETCH DA DATABASE
   final List<Muta> allMuteData = [
     // Sant'Ubaldo
-    Muta(id: 'su_2024_m1', cero: CeroType.santUbaldo, numeroMuta: 1, posizione: 'Calata dei Neri', anno: 2024, dataCreazione: DateTime(2024), persone: [
-      PersonaMuta(nome: 'Mario', cognome: 'Rossi', ruolo: RuoloMuta.puntaAvanti), PersonaMuta(nome: 'Luca', cognome: 'Bianchi', ruolo: RuoloMuta.puntaAvanti),
-      PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti), PersonaMuta(nome: 'Giovanni', cognome: 'Neri', ruolo: RuoloMuta.ceppoAvanti),
-      PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro), PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro),
-      PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro), PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
-    ]),
-    Muta(id: 'su_2023_m1', cero: CeroType.santUbaldo, numeroMuta: 1, posizione: 'Calata dei Neri', anno: 2023, dataCreazione: DateTime(2023), persone: [
-      PersonaMuta(nome: 'Mario', cognome: 'Rossi', ruolo: RuoloMuta.puntaAvanti), PersonaMuta(nome: 'Sergio', cognome: 'Azzurri', ruolo: RuoloMuta.puntaAvanti), // Luca è uscito, Sergio è entrato
-      PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti), PersonaMuta(nome: 'Giovanni', cognome: 'Neri', ruolo: RuoloMuta.ceppoAvanti),
-      PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro), PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro),
-      PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro), PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
-    ]),
-    Muta(id: 'su_2024_m2', cero: CeroType.santUbaldo, numeroMuta: 2, posizione: 'Via dei Consoli', anno: 2024, dataCreazione: DateTime(2024), persone: [
-      PersonaMuta(nome: 'Luigi', cognome: 'Rizzo', ruolo: RuoloMuta.puntaAvanti), PersonaMuta(nome: 'Antonio', cognome: 'Gallo', ruolo: RuoloMuta.puntaAvanti),
-      PersonaMuta(nome: 'Giuseppe', cognome: 'Conte', ruolo: RuoloMuta.ceppoAvanti), PersonaMuta(nome: 'Salvatore', cognome: 'Esposito', ruolo: RuoloMuta.ceppoAvanti),
-      PersonaMuta(nome: 'Roberto', cognome: 'Mancini', ruolo: RuoloMuta.ceppoDietro), PersonaMuta(nome: 'Claudio', cognome: 'Lotito', ruolo: RuoloMuta.ceppoDietro),
-      PersonaMuta(nome: 'Fabio', cognome: 'Capello', ruolo: RuoloMuta.puntaDietro), PersonaMuta(nome: 'Walter', cognome: 'Mazzarri', ruolo: RuoloMuta.puntaDietro),
-    ]),
+    Muta(
+      id: 'su_2024_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2024, dataCreazione: DateTime(2024),
+      stangaSinistra: [
+        PersonaMuta(nome: 'Mario', cognome: 'Rossi', soprannome: 'Fulmine', ruolo: RuoloMuta.puntaAvanti, note: 'Capostanga'),
+        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro),
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Luca', cognome: 'Bianchi', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
+      ],
+      note: 'Prima muta importante della corsa.',
+    ),
+    Muta(
+      id: 'su_2023_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2023, dataCreazione: DateTime(2023),
+      stangaSinistra: [
+        PersonaMuta(nome: 'Mario', cognome: 'Rossi', soprannome: 'Fulmine', ruolo: RuoloMuta.puntaAvanti, note: 'Capostanga'), // Confermato
+        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti), // Confermato
+        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro), // Confermato
+        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro), // Confermato
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Sergio', cognome: 'Azzurri', soprannome: 'Lampo', ruolo: RuoloMuta.puntaAvanti), // Luca Bianchi è uscito, Sergio Azzurri è entrato
+        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti), // Confermato
+        PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro), // Confermato
+        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro), // Confermato
+      ],
+    ),
+    Muta(
+      id: 'su_2022_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2022, dataCreazione: DateTime(2022),
+      stangaSinistra: [
+        PersonaMuta(nome: 'Matteo', cognome: 'Bruni', ruolo: RuoloMuta.puntaAvanti), // Mario Rossi è uscito, Matteo Bruni è entrato
+        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro),
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Sergio', cognome: 'Azzurri', soprannome: 'Lampo', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Leonardo', cognome: 'Rosa', ruolo: RuoloMuta.ceppoDietro), // Andrea Blu è uscito, Leonardo Rosa è entrato
+        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
+      ],
+    ),
     // San Giorgio
-    Muta(id: 'sg_2024_m1', cero: CeroType.sanGiorgio, numeroMuta: 1, posizione: 'Piazza Grande', anno: 2024, dataCreazione: DateTime(2024), persone: [
-      PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti), PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
-      PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti), PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
-      PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro), PersonaMuta(nome: 'Stefano', cognome: 'Spada', ruolo: RuoloMuta.ceppoDietro),
-      PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro), PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
-    ]),
-    Muta(id: 'sg_2023_m1', cero: CeroType.sanGiorgio, numeroMuta: 1, posizione: 'Piazza Grande', anno: 2023, dataCreazione: DateTime(2023), persone: [
-      PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti), PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
-      PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti), PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
-      PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro), PersonaMuta(nome: 'Vittorio', cognome: 'Ascia', ruolo: RuoloMuta.ceppoDietro), // Stefano è uscito, Vittorio è entrato
-      PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro), PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
-    ]),
+    Muta(
+      id: 'sg_2024_pzagrande', cero: CeroType.sanGiorgio, nomeMuta: 'Muta Piazza Grande', posizione: 'Centro Piazza Grande', anno: 2024, dataCreazione: DateTime(2024),
+      stangaSinistra: [
+        PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro),
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Stefano', cognome: 'Spada', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
+      ],
+    ),
+    Muta(
+      id: 'sg_2023_pzagrande', cero: CeroType.sanGiorgio, nomeMuta: 'Muta Piazza Grande', posizione: 'Centro Piazza Grande', anno: 2023, dataCreazione: DateTime(2023),
+      stangaSinistra: [
+        PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro),
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Vittorio', cognome: 'Ascia', soprannome:'Taglio', ruolo: RuoloMuta.ceppoDietro), // Stefano Spada è uscito
+        PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
+      ],
+    ),
   ];
 
   List<Muta> displayedMute = [];
-  // Struttura per i risultati del confronto dettagliato
-  Map<RuoloMuta, Map<String, List<PersonaMuta>>>? comparisonResultData;
+  Map<RuoloMuta, Map<String, _ConfrontoPersona>>? comparisonResultData;
 
   late ThemeProvider _themeProvider;
 
@@ -75,7 +119,6 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   }
 
   void _onCeroChanged() {
-    // Resetta le selezioni e i risultati quando il cero cambia
     setState(() {
       selectedYear = null;
       comparisonYear = null;
@@ -91,33 +134,42 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       comparisonResultData = null;
 
       if (selectedYear != null) {
-        // Filtra le mute per l'anno selezionato E per il cero corrente
         displayedMute = allMuteData
             .where((muta) => muta.anno == selectedYear && muta.cero == currentCero)
             .toList();
 
         if (comparisonYear != null) {
-          final muteAnnoPrincipale = allMuteData
+          final muteAnnoPrincipaleLista = allMuteData
               .where((m) => m.anno == selectedYear && m.cero == currentCero)
-              .toList(); // Potrebbero esserci più mute per lo stesso anno/cero
-          final muteAnnoConfronto = allMuteData
+              .toList();
+          final muteAnnoConfrontoLista = allMuteData
               .where((m) => m.anno == comparisonYear && m.cero == currentCero)
               .toList();
 
-          // Semplificazione: confrontiamo solo la prima muta trovata per ogni anno.
-          // In un'app reale, l'utente dovrebbe poter selezionare quali specifiche mute confrontare.
-          if (muteAnnoPrincipale.isNotEmpty && muteAnnoConfronto.isNotEmpty) {
-            comparisonResultData = _compareMuteDetailed(muteAnnoPrincipale.first, muteAnnoConfronto.first);
+          if (muteAnnoPrincipaleLista.isNotEmpty && muteAnnoConfrontoLista.isNotEmpty) {
+            Muta? mutaA = muteAnnoPrincipaleLista.first; // Prendi la prima muta dell'anno principale
+            Muta? mutaB;
+
+            // Cerca una muta con lo stesso nomeMuta nell'anno di confronto
+            try {
+              mutaB = muteAnnoConfrontoLista.firstWhere((mB) => mB.nomeMuta == mutaA.nomeMuta);
+            } catch (e) {
+              // Se non trovi una muta con lo stesso nome, prendi la prima dell'anno di confronto
+              // Questo potrebbe non essere l'ideale se ci sono più mute con nomi diversi.
+              // Una logica più avanzata potrebbe permettere all'utente di selezionare quale muta confrontare.
+              mutaB = muteAnnoConfrontoLista.first;
+            }
+            comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
           } else {
-            comparisonResultData = {}; // Nessun dato per confronto
+            comparisonResultData = {};
           }
-          // Quando c'è un confronto, non mostriamo la lista di displayedMute
-          displayedMute = [];
+          displayedMute = []; // Non mostrare la lista singola quando c'è un confronto
         }
-        if (displayedMute.isEmpty && comparisonResultData == null) {
-          // Se non ci sono mute per l'anno principale e nessun confronto
+
+        // Mostra un messaggio se non ci sono dati dopo il tentativo di fetch/confronto
+        if (displayedMute.isEmpty && (comparisonResultData == null || comparisonResultData!.isEmpty) && selectedYear != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Nessuna muta trovata per ${Provider.of<ThemeProvider>(context, listen: false).currentCeroName} nell\'anno $selectedYear.')),
+            SnackBar(content: Text('Nessuna muta trovata per ${Provider.of<ThemeProvider>(context, listen: false).currentCeroName} nell\'anno $selectedYear per la visualizzazione o il confronto.')),
           );
         }
 
@@ -129,35 +181,23 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     });
   }
 
-  Map<RuoloMuta, Map<String, List<PersonaMuta>>> _compareMuteDetailed(Muta mutaA, Muta mutaB) {
-    Map<RuoloMuta, Map<String, List<PersonaMuta>>> result = {};
+  Map<RuoloMuta, Map<String, _ConfrontoPersona>> _compareMuteDetailed(Muta mutaA, Muta mutaB) {
+    Map<RuoloMuta, Map<String, _ConfrontoPersona>> result = {};
 
     for (RuoloMuta ruolo in RuoloMuta.values) {
-      List<PersonaMuta> personeA = mutaA.getPersonePerRuolo(ruolo);
-      List<PersonaMuta> personeB = mutaB.getPersonePerRuolo(ruolo);
+      Map<String, _ConfrontoPersona> stangheConfronto = {};
 
-      List<PersonaMuta> confermati = [];
-      List<PersonaMuta> entrati = List.from(personeB); // Copia per modifica
-      List<PersonaMuta> usciti = [];
+      // Stanga Sinistra
+      PersonaMuta? pA_sinistra = mutaA.getPersonaPerRuoloEStanga(ruolo, true);
+      PersonaMuta? pB_sinistra = mutaB.getPersonaPerRuoloEStanga(ruolo, true);
+      stangheConfronto['Sinistra'] = _ConfrontoPersona(prima: pA_sinistra, dopo: pB_sinistra);
 
-      for (PersonaMuta pA in personeA) {
-        PersonaMuta? matchingPB = personeB.firstWhere(
-                (pB) => pB.nomeCompleto == pA.nomeCompleto, // Confronto per nome completo
-            orElse: () => PersonaMuta(nome: "dummy", cognome: "dummy", ruolo: ruolo) // Valore fittizio per evitare null error se non trovato
-        );
+      // Stanga Destra
+      PersonaMuta? pA_destra = mutaA.getPersonaPerRuoloEStanga(ruolo, false);
+      PersonaMuta? pB_destra = mutaB.getPersonaPerRuoloEStanga(ruolo, false);
+      stangheConfronto['Destra'] = _ConfrontoPersona(prima: pA_destra, dopo: pB_destra);
 
-        if (matchingPB.nome != "dummy") { // Se trovato in B
-          confermati.add(pA);
-          entrati.removeWhere((pB) => pB.nomeCompleto == pA.nomeCompleto); // Rimuovi dai potenziali entrati
-        } else { // Se non trovato in B, è uscito
-          usciti.add(pA);
-        }
-      }
-      result[ruolo] = {
-        'confermati': confermati,
-        'usciti': usciti,
-        'entrati': entrati,
-      };
+      result[ruolo] = stangheConfronto;
     }
     return result;
   }
@@ -165,21 +205,21 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Ascolta i cambiamenti del ThemeProvider per ricostruire l'interfaccia con il tema corretto
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Archivio ${themeProvider.currentCeroName}'),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: CeroSelector(showAsPopup: true, showFullName: false),
           ),
         ],
       ),
       body: Column(
         children: [
+          // Header con info cero (invariato)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
@@ -205,6 +245,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               ],
             ),
           ),
+          // Controlli di selezione anno (invariati)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -242,7 +283,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                             if (comparisonYear == selectedYear && selectedYear != null) {
                               comparisonYear = null;
                             }
-                            // Resetta i risultati se si cambia solo l'anno principale
+                            // Resetta i risultati quando l'anno principale cambia
                             displayedMute = [];
                             comparisonResultData = null;
                           });
@@ -263,7 +304,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                               color: themeProvider.currentTheme.colorScheme.secondary),
                         ),
                         items: availableYears
-                            .where((year) => year != selectedYear)
+                            .where((year) => year != selectedYear) // Non si può confrontare con se stesso
                             .map((year) => DropdownMenuItem(
                           value: year,
                           child: Text(year.toString()),
@@ -272,7 +313,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                         onChanged: (value) {
                           setState(() {
                             comparisonYear = value;
-                            // Resetta i risultati se si cambia solo l'anno di confronto
+                            // Resetta i risultati quando l'anno di confronto cambia
                             displayedMute = [];
                             comparisonResultData = null;
                           });
@@ -295,13 +336,14 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                           borderRadius: BorderRadius.circular(8.0),
                         )
                     ),
-                    onPressed: selectedYear != null ? _fetchAndDisplayMute : null,
+                    onPressed: selectedYear != null ? _fetchAndDisplayMute : null, // Abilitato solo se l'anno principale è selezionato
                   ),
                 ),
               ],
             ),
           ),
           const Divider(height: 1, thickness: 1),
+          // Area di visualizzazione
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -312,14 +354,16 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ))
-                  : SingleChildScrollView(
+                  : SingleChildScrollView( // Permette lo scroll se il contenuto è lungo
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Se ci sono dati di confronto, mostra la vista di confronto
                     if (comparisonResultData != null && comparisonResultData!.isNotEmpty)
                       _buildComparisonView(comparisonResultData!, themeProvider, selectedYear!, comparisonYear!),
+                    // Altrimenti, se ci sono mute da visualizzare (nessun confronto attivo), mostrale
                     if (displayedMute.isNotEmpty)
-                      ...displayedMute.map((muta) => _MutaDisplayCard(muta: muta, themeProvider: themeProvider)),
+                      ...displayedMute.map((muta) => _MutaDisplayCard(muta: muta, themeProvider: themeProvider)).toList(),
                   ],
                 ),
               ),
@@ -330,41 +374,80 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     );
   }
 
-  Widget _buildComparisonView(Map<RuoloMuta, Map<String, List<PersonaMuta>>> data, ThemeProvider themeProvider, int annoA, int annoB) {
+  Widget _buildComparisonView(Map<RuoloMuta, Map<String, _ConfrontoPersona>> data, ThemeProvider themeProvider, int annoA, int annoB) {
     List<Widget> ruoloWidgets = [];
 
-    data.forEach((ruolo, dettagli) {
+    // Titolo del confronto
+    String nomeMutaConfrontataA = "Muta Anno $annoA";
+    String nomeMutaConfrontataB = "Muta Anno $annoB";
+
+    // Tentativo di trovare i nomi delle mute confrontate (se disponibili e univoche per il confronto)
+    // Questa logica assume che _compareMuteDetailed sia stata chiamata con mute specifiche.
+    // Per una maggiore precisione, i nomi delle mute confrontate potrebbero essere passati a questa funzione.
+    final currentCero = Provider.of<ThemeProvider>(context, listen: false).currentCero;
+    try {
+      final mutaConfrontataObjA = allMuteData.firstWhere((m) => m.anno == annoA && m.cero == currentCero && comparisonResultData!.isNotEmpty); // Semplificazione
+      nomeMutaConfrontataA = mutaConfrontataObjA.nomeMuta;
+    } catch (e) {/* non fare nulla, usa il default */}
+    try {
+      final mutaConfrontataObjB = allMuteData.firstWhere((m) => m.anno == annoB && m.cero == currentCero && comparisonResultData!.isNotEmpty); // Semplificazione
+      nomeMutaConfrontataB = mutaConfrontataObjB.nomeMuta;
+    } catch (e) {/* non fare nulla, usa il default */}
+
+
+    data.forEach((ruolo, stangheDettagli) {
+      List<Widget> stangaDetailWidgets = [];
+      stangheDettagli.forEach((stangaNome, confrontoPersona) {
+        Widget dettaglioWidget;
+        TextStyle defaultStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 13);
+
+        if (confrontoPersona.prima == null && confrontoPersona.dopo == null) {
+          dettaglioWidget = Text('  $stangaNome: Nessun dato', style: defaultStyle.copyWith(color: Colors.grey));
+        } else if (confrontoPersona.prima != null && confrontoPersona.dopo != null) {
+          if (confrontoPersona.prima == confrontoPersona.dopo) {
+            dettaglioWidget = Text('  $stangaNome: ${confrontoPersona.prima!.nomeCompleto} (Confermato)', style: defaultStyle);
+          } else {
+            dettaglioWidget = RichText(
+              text: TextSpan(
+                style: defaultStyle,
+                children: <TextSpan>[
+                  TextSpan(text: '  $stangaNome: '),
+                  TextSpan(text: '${confrontoPersona.prima!.nomeCompleto} ', style: const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.redAccent)),
+                  const TextSpan(text: '-> ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: confrontoPersona.dopo!.nomeCompleto, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            );
+          }
+        } else if (confrontoPersona.prima != null && confrontoPersona.dopo == null) {
+          dettaglioWidget = Text('  $stangaNome: ${confrontoPersona.prima!.nomeCompleto} (Uscito)', style: defaultStyle.copyWith(color: Colors.redAccent));
+        } else { // prima == null && dopo != null
+          dettaglioWidget = Text('  $stangaNome: ${confrontoPersona.dopo!.nomeCompleto} (Entrato)', style: defaultStyle.copyWith(color: Colors.green, fontWeight: FontWeight.bold));
+        }
+        stangaDetailWidgets.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.5),
+          child: dettaglioWidget,
+        ));
+      });
+
       ruoloWidgets.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Card(
-            elevation: 2,
+            elevation: 1,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim(), // Formatta il nome del ruolo
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
+                    // Formattazione del nome del ruolo per leggibilità
+                    ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter(),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
                   ),
-                  const Divider(),
-                  if (dettagli['confermati']!.isNotEmpty) ...[
-                    Text('Confermati ($annoA e $annoB):', style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ...dettagli['confermati']!.map((p) => Text('  - ${p.nomeCompleto}')),
-                    const SizedBox(height: 8),
-                  ],
-                  if (dettagli['usciti']!.isNotEmpty) ...[
-                    Text('Usciti (da $annoA):', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red.shade700)),
-                    ...dettagli['usciti']!.map((p) => Text('  - ${p.nomeCompleto}')),
-                    const SizedBox(height: 8),
-                  ],
-                  if (dettagli['entrati']!.isNotEmpty) ...[
-                    Text('Entrati (in $annoB):', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
-                    ...dettagli['entrati']!.map((p) => Text('  - ${p.nomeCompleto}')),
-                  ],
-                  if (dettagli['confermati']!.isEmpty && dettagli['usciti']!.isEmpty && dettagli['entrati']!.isEmpty)
-                    const Text('Nessun cambiamento o dato per questo ruolo.'),
+                  const Divider(height: 10, thickness: 0.5),
+                  ...stangaDetailWidgets,
                 ],
               ),
             ),
@@ -377,8 +460,11 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical:8.0),
-          child: Text('Confronto Mute: $annoA vs $annoB', style: Theme.of(context).textTheme.titleLarge),
+          padding: const EdgeInsets.only(bottom: 10.0, top: 5.0),
+          child: Text(
+              'Confronto: "$nomeMutaConfrontataA" ($annoA) vs "$nomeMutaConfrontataB" ($annoB)',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 19)
+          ),
         ),
         ...ruoloWidgets
       ],
@@ -386,6 +472,15 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   }
 }
 
+// Helper class per il confronto di una singola posizione
+class _ConfrontoPersona {
+  final PersonaMuta? prima; // Persona nell'anno principale
+  final PersonaMuta? dopo;  // Persona nell'anno di confronto
+
+  _ConfrontoPersona({this.prima, this.dopo});
+}
+
+// Widget per visualizzare una singola Muta
 class _MutaDisplayCard extends StatelessWidget {
   final Muta muta;
   final ThemeProvider themeProvider;
@@ -395,54 +490,100 @@ class _MutaDisplayCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      margin: const EdgeInsets.symmetric(vertical: 10.0),
       elevation: 2,
-      color: themeProvider.currentPrimaryColor.withOpacity(0.05),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: themeProvider.currentPrimaryColor.withOpacity(0.03), // Sfondo leggermente colorato
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${muta.posizione} - Anno: ${muta.anno}', // o muta.nomeMuta se preferisci
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
+              '${muta.nomeMuta} (${muta.posizione}) - Anno: ${muta.anno}',
+              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
             ),
             if (muta.note != null && muta.note!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
-                child: Text('Note: ${muta.note}', style: const TextStyle(fontStyle: FontStyle.italic)),
+                padding: const EdgeInsets.only(top: 5.0, bottom: 8.0),
+                child: Text('Note Muta: ${muta.note}', style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black54)),
               ),
-            const Divider(),
-            ...RuoloMuta.values.map((ruolo) {
-              List<PersonaMuta> personePerRuolo = muta.getPersonePerRuolo(ruolo);
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 120, // Larghezza fissa per l'etichetta del ruolo
-                      child: Text(
-                        // Formattazione del nome del ruolo per leggibilità
-                        '${ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim()}:',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: personePerRuolo.isNotEmpty
-                            ? personePerRuolo.map((p) => Text(p.nomeCompleto)).toList()
-                            : [const Text('-', style: TextStyle(color: Colors.grey))],
-                      ),
-                    ),
-                  ],
+            const Divider(height: 15, thickness: 0.5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Colonna Stanga Sinistra
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Stanga Sinistra', style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      ...RuoloMuta.values.map((ruolo) {
+                        PersonaMuta? p = muta.getPersonaPerRuoloEStanga(ruolo, true);
+                        return _buildPersonaRuoloRow(ruolo, p);
+                      }).toList(),
+                    ],
+                  ),
                 ),
-              );
-            }),
+                const SizedBox(width: 16), // Spazio tra le stanghe
+                // Colonna Stanga Destra
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Stanga Destra', style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      ...RuoloMuta.values.map((ruolo) {
+                        PersonaMuta? p = muta.getPersonaPerRuoloEStanga(ruolo, false);
+                        return _buildPersonaRuoloRow(ruolo, p);
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildPersonaRuoloRow(RuoloMuta ruolo, PersonaMuta? persona) {
+    // Formattazione del nome del ruolo per leggibilità (es. "Punta Avanti")
+    String ruoloFormatted = ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0), // Aumentato padding verticale
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$ruoloFormatted:',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5), // Leggermente più grande
+          ),
+          Text(
+            persona?.nomeCompleto ?? '-', // Mostra il nome completo (con soprannome)
+            style: const TextStyle(fontSize: 13.5),
+          ),
+          if (persona?.note != null && persona!.note!.isNotEmpty) // Mostra le note della persona se presenti
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Text(
+                '(${persona.note})', // Nota specifica della persona
+                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11.5, color: Colors.grey.shade700),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Estensione per capitalizzare la prima lettera di una stringa
+extension StringExtension on String {
+  String capitalizeFirstLetter() {
+    if (isEmpty) return "";
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }

@@ -1,10 +1,6 @@
 name: Android Build
 
-on:
-  push:
-    branches:
-      - main
-      - master
+on: [push]
 
 jobs:
   build:
@@ -34,9 +30,11 @@ jobs:
         run: flutter test
 
       - name: Build APK
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: flutter build apk --release
 
       - name: Upload Artifact
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
           name: release-apk

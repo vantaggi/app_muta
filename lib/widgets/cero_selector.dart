@@ -6,11 +6,13 @@ import 'package:app_muta/theme/app_theme.dart';
 class CeroSelector extends StatelessWidget {
   final bool showAsPopup;
   final bool showFullName;
+  final Function(CeroType)? onCeroChanged;
 
   const CeroSelector({
     super.key,
     this.showAsPopup = false,
     this.showFullName = true,
+    this.onCeroChanged,
   });
 
   @override
@@ -39,6 +41,9 @@ class CeroSelector extends StatelessWidget {
       ),
       onSelected: (CeroType cero) {
         themeProvider.changeCero(cero);
+        if (onCeroChanged != null) {
+          onCeroChanged!(cero);
+        }
       },
       itemBuilder: (BuildContext context) => [
         _buildPopupMenuItem(CeroType.santUbaldo, "Sant'Ubaldo", Icons.star, Colors.yellow.shade700),
@@ -79,7 +84,12 @@ class CeroSelector extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: GestureDetector(
-                onTap: () => themeProvider.changeCero(cero),
+                onTap: () {
+                  themeProvider.changeCero(cero);
+                  if (onCeroChanged != null) {
+                    onCeroChanged!(cero);
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(

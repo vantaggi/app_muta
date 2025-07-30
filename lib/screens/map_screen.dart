@@ -6,6 +6,7 @@ import 'package:app_muta/models/muta_model.dart';
 import 'package:app_muta/services/database_helper.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
+import 'package:app_muta/theme/app_theme.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -37,7 +38,7 @@ class _MapScreenState extends State<MapScreen> {
                 width: 80.0,
                 height: 80.0,
                 point: LatLng(muta.latitude!, muta.longitude!),
-                builder: (ctx) => GestureDetector(
+                child: GestureDetector(
                   onTap: () {
                     _showMutaDetails(context, muta, themeProvider);
                   },
@@ -65,7 +66,13 @@ class _MapScreenState extends State<MapScreen> {
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: CeroSelector(showAsPopup: true, showFullName: false, onCeroChanged: _loadMute),
+                child: CeroSelector(
+                  showAsPopup: true,
+                  showFullName: false,
+                  onCeroChanged: (CeroType cero) {
+                    _loadMute();
+                  },
+                ),
               ),
             ],
           ),

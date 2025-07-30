@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/screens/main_navigator.dart';
+import 'package:app_muta/screens/login_screen.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 
 void main() {
@@ -20,7 +20,7 @@ class AppMuta extends StatelessWidget {
             title: 'App Muta',
             theme: themeProvider.currentTheme,
             debugShowCheckedModeBanner: false,
-            home: const MainNavigator(),
+            home: const LoginScreen(),
           );
         },
       ),

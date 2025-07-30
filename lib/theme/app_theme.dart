@@ -60,7 +60,10 @@ class AppTheme {
   );
 
   // Funzione per ottenere il tema corretto
-  static ThemeData getTheme(CeroType ceroType) {
+  static ThemeData getTheme(CeroType ceroType, {bool isDarkMode = false}) {
+    if (isDarkMode) {
+      return _getDarkTheme(ceroType);
+    }
     switch (ceroType) {
       case CeroType.santUbaldo:
         return _santUbaldoTheme;
@@ -70,6 +73,57 @@ class AppTheme {
         return _santAntonioTheme;
       default:
         return _santUbaldoTheme; // Tema di default
+    }
+  }
+
+  static ThemeData _getDarkTheme(CeroType ceroType) {
+    switch (ceroType) {
+      case CeroType.santUbaldo:
+        return ThemeData.dark().copyWith(
+          primaryColor: Colors.yellow.shade700,
+          colorScheme: ColorScheme.fromSwatch(
+            brightness: Brightness.dark,
+            primarySwatch: Colors.yellow,
+            accentColor: _rosso,
+          ).copyWith(
+            secondary: _rosso,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.yellow.shade700,
+            foregroundColor: Colors.black,
+          ),
+        );
+      case CeroType.sanGiorgio:
+        return ThemeData.dark().copyWith(
+          primaryColor: Colors.blue.shade700,
+          colorScheme: ColorScheme.fromSwatch(
+            brightness: Brightness.dark,
+            primarySwatch: Colors.blue,
+            accentColor: _rosso,
+          ).copyWith(
+            secondary: _rosso,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.blue.shade700,
+            foregroundColor: Colors.white,
+          ),
+        );
+      case CeroType.santAntonio:
+        return ThemeData.dark().copyWith(
+          primaryColor: Colors.black,
+          colorScheme: ColorScheme.fromSwatch(
+            brightness: Brightness.dark,
+            primarySwatch: Colors.grey,
+            accentColor: _rosso,
+          ).copyWith(
+            primary: Colors.black,
+            secondary: _rosso,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+          ),
+        );
     }
   }
 }

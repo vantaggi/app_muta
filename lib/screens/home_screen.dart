@@ -1,11 +1,43 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:app_muta/services/database_helper.dart';
 import 'package:app_muta/theme/app_theme.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Future<void> _exportData(BuildContext context) async {
+    final mute = await DatabaseHelper.instance.readAllMute();
+    final json = jsonEncode(mute.map((m) => m.toJson()).toList());
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/muta_export.json';
+    final file = File(path);
+    await file.writeAsString(json);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Data exported to $path')),
+    );
+  }
+
+  Future<void> _importData(BuildContext context) async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      final file = File(result.files.single.path!);
+      final json = await file.readAsString();
+      final data = jsonDecode(json) as List;
+      for (final item in data) {
+        await DatabaseHelper.instance.insertMuta(Muta.fromJson(item));
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data imported successfully')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +46,14 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text('App Muta - ${themeProvider.currentCeroName}'),
-            actions: const [
-              Padding(
+            actions: [
+              IconButton(
+                icon: Icon(themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              ),
+              const Padding(
                 padding: EdgeInsets.only(right: 8.0),
                 child: CeroSelector(showAsPopup: true, showFullName: false),
               ),
@@ -129,6 +167,31 @@ class HomeScreen extends StatelessWidget {
                         'Crea Muta',
                         Icons.add_circle_outline,
                             () => _navigateToTab(context, 2),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickActionCard(
+                        context,
+                        'Importa Dati',
+                        Icons.file_upload,
+                        () => _importData(context),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      child: Container(),
+                    ),
+                    Expanded(
+                      child: _buildQuickActionCard(
+                        context,
+                        'Esporta Dati',
+                        Icons.file_download,
+                        () => _exportData(context),
                       ),
                     ),
                   ],

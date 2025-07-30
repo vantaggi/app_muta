@@ -3,10 +3,17 @@ import 'package:app_muta/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
   CeroType _currentCero = CeroType.santUbaldo; // Cero di default
+  bool _isDarkMode = false;
 
   CeroType get currentCero => _currentCero;
+  bool get isDarkMode => _isDarkMode;
 
-  ThemeData get currentTheme => AppTheme.getTheme(_currentCero);
+  ThemeData get currentTheme => AppTheme.getTheme(_currentCero, isDarkMode: _isDarkMode);
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
 
   String get currentCeroName {
     switch (_currentCero) {

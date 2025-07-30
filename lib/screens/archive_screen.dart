@@ -97,10 +97,12 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             // Una logica più avanzata potrebbe permettere all'utente di selezionare quale muta confrontare.
             mutaB = muteAnnoConfrontoLista.first;
           }
-          setState(() {
-            comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
-            displayedMute = []; // Non mostrare la lista singola quando c'è un confronto
-          });
+          if (mutaB != null) {
+            setState(() {
+              comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
+              displayedMute = []; // Non mostrare la lista singola quando c'è un confronto
+            });
+          }
         } else {
           setState(() {
             comparisonResultData = {};
@@ -343,14 +345,21 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     // Questa logica assume che _compareMuteDetailed sia stata chiamata con mute specifiche.
     // Per una maggiore precisione, i nomi delle mute confrontate potrebbero essere passati a questa funzione.
     final currentCero = Provider.of<ThemeProvider>(context, listen: false).currentCero;
-    try {
-      final mutaConfrontataObjA = allMuteData.firstWhere((m) => m.anno == annoA && m.cero == currentCero && comparisonResultData!.isNotEmpty); // Semplificazione
-      nomeMutaConfrontataA = mutaConfrontataObjA.nomeMuta;
-    } catch (e) {/* non fare nulla, usa il default */}
-    try {
-      final mutaConfrontataObjB = allMuteData.firstWhere((m) => m.anno == annoB && m.cero == currentCero && comparisonResultData!.isNotEmpty); // Semplificazione
-      nomeMutaConfrontataB = mutaConfrontataObjB.nomeMuta;
-    } catch (e) {/* non fare nulla, usa il default */}
+    // This is a simplification. A better approach would be to pass the mute names to this function.
+    DatabaseHelper.instance.readMuteByYearAndCero(annoA, currentCero).then((mute) {
+      if (mute.isNotEmpty) {
+        setState(() {
+          nomeMutaConfrontataA = mute.first.nomeMuta;
+        });
+      }
+    });
+    DatabaseHelper.instance.readMuteByYearAndCero(annoB, currentCero).then((mute) {
+      if (mute.isNotEmpty) {
+        setState(() {
+          nomeMutaConfrontataB = mute.first.nomeMuta;
+        });
+      }
+    });
 
 
     data.forEach((ruolo, stangheDettagli) {

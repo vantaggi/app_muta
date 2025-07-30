@@ -10,8 +10,42 @@ import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
 import 'package:app_muta/models/muta_model.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _muteCount = 0;
+  int _yearCount = 0;
+  late ThemeProvider _themeProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    _themeProvider.addListener(_loadStats);
+    _loadStats();
+  }
+
+  @override
+  void dispose() {
+    _themeProvider.removeListener(_loadStats);
+    super.dispose();
+  }
+
+  Future<void> _loadStats() async {
+    final mute = await DatabaseHelper.instance.readAllMute();
+    final currentCero = _themeProvider.currentCero;
+    final muteForCero = mute.where((m) => m.cero == currentCero).toList();
+    final years = muteForCero.map((m) => m.anno).toSet().toList();
+    setState(() {
+      _muteCount = muteForCero.length;
+      _yearCount = years.length;
+    });
+  }
 
   Future<void> _exportData(BuildContext context) async {
     final mute = await DatabaseHelper.instance.readAllMute();
@@ -37,6 +71,7 @@ class HomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Data imported successfully')),
       );
+      _loadStats();
     }
   }
 
@@ -60,144 +95,151 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Card di benvenuto con info del cero
-                Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              themeProvider.currentCeroIcon,
-                              size: 32,
-                              color: themeProvider.currentPrimaryColor,
-                            ),
-                            const SizedBox(width: 12),
-                      Expanded( // <--- Added Expanded
-                      child:Text(
-                              'Cero di ${themeProvider.currentCeroName}',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(child: child, opacity: animation);
+            },
+            child: SingleChildScrollView(
+              key: ValueKey<CeroType>(themeProvider.currentCero),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Card di benvenuto con info del cero
+                  Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                themeProvider.currentCeroIcon,
+                                size: 32,
+                                color: themeProvider.currentPrimaryColor,
                               ),
-                            ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _getCeroDescription(themeProvider.currentCero),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Selettore cero inline
-                Text(
-                  'Seleziona Cero:',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const CeroSelector(showAsPopup: false),
-
-                const SizedBox(height: 24),
-
-                // Statistiche del cero corrente
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Statistiche ${themeProvider.currentCeroName}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                              const SizedBox(width: 12),
+                              Expanded( // <--- Added Expanded
+                                child:Text(
+                                  'Cero di ${themeProvider.currentCeroName}',
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _getCeroDescription(themeProvider.currentCero),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Selettore cero inline
+                  Text(
+                    'Seleziona Cero:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const CeroSelector(showAsPopup: false),
+
+                  const SizedBox(height: 24),
+
+                  // Statistiche del cero corrente
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Statistiche ${themeProvider.currentCeroName}',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildStatRow(context, 'Mute registrate', '$_muteCount'),
+                          _buildStatRow(context, 'Anni di archivio', '$_yearCount'),
+                          _buildStatRow(context, 'Ultima modifica', 'Mai'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Azioni rapide
+                  Text(
+                    'Azioni Rapide:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Visualizza Mappa',
+                          Icons.map,
+                              () => _navigateToTab(context, 1),
                         ),
-                        const SizedBox(height: 12),
-                        _buildStatRow(context, 'Mute registrate', '0'),
-                        _buildStatRow(context, 'Anni di archivio', '0'),
-                        _buildStatRow(context, 'Ultima modifica', 'Mai'),
-                      ],
-                    ),
+                      ),
+                      // Use Padding instead of SizedBox for flexible spacing
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0), // Half of 12.0 on each side
+                        child: Container(), // An empty container for the padding
+                      ),
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Crea Muta',
+                          Icons.add_circle_outline,
+                              () => _navigateToTab(context, 2),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Azioni rapide
-                Text(
-                  'Azioni Rapide:',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Importa Dati',
+                          Icons.file_upload,
+                          () => _importData(context),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        child: Container(),
+                      ),
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Esporta Dati',
+                          Icons.file_download,
+                          () => _exportData(context),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        'Visualizza Mappa',
-                        Icons.map,
-                            () => _navigateToTab(context, 1),
-                      ),
-                    ),
-                    // Use Padding instead of SizedBox for flexible spacing
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0), // Half of 12.0 on each side
-                      child: Container(), // An empty container for the padding
-                    ),
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        'Crea Muta',
-                        Icons.add_circle_outline,
-                            () => _navigateToTab(context, 2),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        'Importa Dati',
-                        Icons.file_upload,
-                        () => _importData(context),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Container(),
-                    ),
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        context,
-                        'Esporta Dati',
-                        Icons.file_download,
-                        () => _exportData(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

@@ -47,6 +47,7 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
   };
 
   final GlobalKey _renderKey = GlobalKey();
+  int _currentStep = 0;
 
 
   @override
@@ -240,8 +241,9 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
     _annoController.text = DateTime.now().year.toString(); // Reimposta all'anno corrente
     _stangaSinistraControllers.values.forEach((list) => list.forEach((c) => c.clear()));
     _stangaDestraControllers.values.forEach((list) => list.forEach((c) => c.clear()));
-    // Potrebbe essere utile forzare un rebuild se necessario, anche se setState qui non è l'ideale senza un cambio di stato diretto
-    // setState(() {});
+    setState(() {
+      _currentStep = 0;
+    });
   }
 
 
@@ -320,134 +322,147 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
           ),
           body: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    color: themeProvider.currentPrimaryColor.withOpacity(0.1),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
+            child: Stepper(
+              currentStep: _currentStep,
+              onStepContinue: () {
+                if (_currentStep < 3) {
+                  setState(() {
+                    _currentStep += 1;
+                  });
+                } else {
+                  _saveMuta(themeProvider);
+                }
+              },
+              onStepCancel: () {
+                if (_currentStep > 0) {
+                  setState(() {
+                    _currentStep -= 1;
+                  });
+                }
+              },
+              steps: [
+                Step(
+                  title: const Text('Informazioni Muta'),
+                  content: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nomeMutaController,
+                        decoration: const InputDecoration(labelText: 'Nome Muta (es. Muta Ospedale)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.label_important_outline)),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Nome muta richiesto' : null,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start, // Allinea i campi se hanno altezze diverse
                         children: [
-                          Icon(
-                            themeProvider.currentCeroIcon,
-                            color: themeProvider.currentPrimaryColor,
-                            size: 28,
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _posizioneController,
+                              decoration: const InputDecoration(labelText: 'Posizione Geografica', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on_outlined)),
+                              validator: (v) => (v == null || v.isEmpty) ? 'Posizione richiesta' : null,
+                            ),
                           ),
                           const SizedBox(width: 12),
-                          Expanded( // Per evitare overflow
-                            child: Text(
-                              'Creazione muta per il Cero di ${themeProvider.currentCeroName}',
-                              style: TextStyle(
-                                  color: themeProvider.currentPrimaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16
+                          Expanded(
+                            flex: 1,
+                            child: TextFormField(
+                              controller: _annoController,
+                              decoration: const InputDecoration(labelText: 'Anno', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today_outlined)),
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Anno richiesto';
+                                if (int.tryParse(v) == null) return 'Anno non valido';
+                                if (v.length != 4) return 'Formato YYYY'; // Anno a 4 cifre
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _latitudeController,
+                              decoration: const InputDecoration(labelText: 'Latitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _longitudeController,
+                              decoration: const InputDecoration(labelText: 'Longitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Step(
+                  title: const Text('Stanga Sinistra'),
+                  content: _buildStangaSection('Stanga Sinistra', true, themeProvider),
+                ),
+                Step(
+                  title: const Text('Stanga Destra'),
+                  content: _buildStangaSection('Stanga Destra', false, themeProvider),
+                ),
+                Step(
+                  title: const Text('Note & Salva'),
+                  content: Column(
+                    children: [
+                      TextFormField(
+                        controller: _noteMutaController,
+                        decoration: const InputDecoration(labelText: 'Note Generali Muta (Opz.)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.notes_outlined), hintText: "Es. 'Muta veloce', 'Fare attenzione al tombino'"),
+                        maxLines: 3,
+                        textCapitalization: TextCapitalization.sentences,
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _previewMuta(themeProvider),
+                              icon: const Icon(Icons.visibility_outlined),
+                              label: const Text('Anteprima'),
+                              style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
+                                  side: BorderSide(color: themeProvider.currentPrimaryColor),
+                                  foregroundColor: themeProvider.currentPrimaryColor,
+                                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => _saveMuta(themeProvider),
+                              icon: const Icon(Icons.save_alt_outlined),
+                              label: const Text('Salva Muta'),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: themeProvider.currentPrimaryColor,
+                                  foregroundColor: themeProvider.currentPrimaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
+                                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text('Informazioni Muta', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _nomeMutaController,
-                    decoration: const InputDecoration(labelText: 'Nome Muta (es. Muta Ospedale)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.label_important_outline)),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Nome muta richiesto' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Allinea i campi se hanno altezze diverse
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: _posizioneController,
-                          decoration: const InputDecoration(labelText: 'Posizione Geografica', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on_outlined)),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Posizione richiesta' : null,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex:1,
-                        child: TextFormField(
-                          controller: _annoController,
-                          decoration: const InputDecoration(labelText: 'Anno', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today_outlined)),
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Anno richiesto';
-                            if (int.tryParse(v) == null) return 'Anno non valido';
-                            if (v.length != 4) return 'Formato YYYY'; // Anno a 4 cifre
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _latitudeController,
-                          decoration: const InputDecoration(labelText: 'Latitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _longitudeController,
-                          decoration: const InputDecoration(labelText: 'Longitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Text('Composizione Muta', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  _buildStangaSection('Stanga Sinistra', true, themeProvider),
-                  _buildStangaSection('Stanga Destra', false, themeProvider),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _noteMutaController,
-                    decoration: const InputDecoration(labelText: 'Note Generali Muta (Opz.)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.notes_outlined), hintText: "Es. 'Muta veloce', 'Fare attenzione al tombino'"),
-                    maxLines: 3,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _previewMuta(themeProvider),
-                          icon: const Icon(Icons.visibility_outlined),
-                          label: const Text('Anteprima'),
-                          style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
-                              side: BorderSide(color: themeProvider.currentPrimaryColor),
-                              foregroundColor: themeProvider.currentPrimaryColor,
-                              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: () => _saveMuta(themeProvider),
-                          icon: const Icon(Icons.save_alt_outlined),
-                          label: const Text('Salva Muta'),
+                          onPressed: () => _exportMuta(themeProvider),
+                          icon: const Icon(Icons.image_outlined),
+                          label: const Text('Esporta come Immagine'),
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: themeProvider.currentPrimaryColor,
-                              foregroundColor: themeProvider.currentPrimaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                              backgroundColor: themeProvider.currentTheme.colorScheme.secondary, // Usa colore secondario per distinguere
+                              foregroundColor: themeProvider.currentTheme.colorScheme.secondary.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
                               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
                           ),
@@ -455,24 +470,8 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _exportMuta(themeProvider),
-                      icon: const Icon(Icons.image_outlined),
-                      label: const Text('Esporta come Immagine'),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: themeProvider.currentTheme.colorScheme.secondary, // Usa colore secondario per distinguere
-                          foregroundColor: themeProvider.currentTheme.colorScheme.secondary.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20), // Spazio extra in fondo
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

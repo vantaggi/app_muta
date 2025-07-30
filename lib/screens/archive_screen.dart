@@ -18,14 +18,12 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   int? comparisonYear;
 
   List<int> availableYears = [];
-  List<Muta> allMuteData = [];
-
   List<Muta> displayedMute = [];
   Map<RuoloMuta, Map<String, _ConfrontoPersona>>? comparisonResultData;
 
   late ThemeProvider _themeProvider;
 
-  void _searchPerson(String query) {
+  Future<void> _searchPerson(String query) async {
     if (query.isEmpty) {
       setState(() {
         displayedMute = [];
@@ -34,16 +32,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     }
 
     final lowerCaseQuery = query.toLowerCase();
-    final results = allMuteData.where((muta) {
-      return muta.stangaSinistra.any((p) =>
-          p.nome.toLowerCase().contains(lowerCaseQuery) ||
-          p.cognome.toLowerCase().contains(lowerCaseQuery) ||
-          (p.soprannome?.toLowerCase().contains(lowerCaseQuery) ?? false)) ||
-          muta.stangaDestra.any((p) =>
-          p.nome.toLowerCase().contains(lowerCaseQuery) ||
-          p.cognome.toLowerCase().contains(lowerCaseQuery) ||
-          (p.soprannome?.toLowerCase().contains(lowerCaseQuery) ?? false));
-    }).toList();
+    final results = await DatabaseHelper.instance.searchMuteByPerson(lowerCaseQuery);
 
     setState(() {
       displayedMute = results;
@@ -56,14 +45,13 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     super.initState();
     _themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     _themeProvider.addListener(_onCeroChanged);
-    _loadData();
+    _loadYears();
   }
 
-  Future<void> _loadData() async {
-    final mute = await DatabaseHelper.instance.readAllMute();
+  Future<void> _loadYears() async {
+    final years = await DatabaseHelper.instance.getAvailableYears();
     setState(() {
-      allMuteData = mute;
-      availableYears = mute.map((m) => m.anno).toSet().toList();
+      availableYears = years;
       availableYears.sort((a, b) => b.compareTo(a));
     });
   }
@@ -80,62 +68,63 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       comparisonYear = null;
       displayedMute = [];
       comparisonResultData = null;
-      _loadData();
+      _loadYears();
     });
   }
 
-  void _fetchAndDisplayMute() {
+  Future<void> _fetchAndDisplayMute() async {
     final currentCero = Provider.of<ThemeProvider>(context, listen: false).currentCero;
     setState(() {
       displayedMute = [];
       comparisonResultData = null;
+    });
 
-      if (selectedYear != null) {
-        displayedMute = allMuteData
-            .where((muta) => muta.anno == selectedYear && muta.cero == currentCero)
-            .toList();
+    if (selectedYear != null) {
+      if (comparisonYear != null) {
+        final muteAnnoPrincipaleLista = await DatabaseHelper.instance.readMuteByYearAndCero(selectedYear!, currentCero);
+        final muteAnnoConfrontoLista = await DatabaseHelper.instance.readMuteByYearAndCero(comparisonYear!, currentCero);
 
-        if (comparisonYear != null) {
-          final muteAnnoPrincipaleLista = allMuteData
-              .where((m) => m.anno == selectedYear && m.cero == currentCero)
-              .toList();
-          final muteAnnoConfrontoLista = allMuteData
-              .where((m) => m.anno == comparisonYear && m.cero == currentCero)
-              .toList();
+        if (muteAnnoPrincipaleLista.isNotEmpty && muteAnnoConfrontoLista.isNotEmpty) {
+          Muta? mutaA = muteAnnoPrincipaleLista.first; // Prendi la prima muta dell'anno principale
+          Muta? mutaB;
 
-          if (muteAnnoPrincipaleLista.isNotEmpty && muteAnnoConfrontoLista.isNotEmpty) {
-            Muta? mutaA = muteAnnoPrincipaleLista.first; // Prendi la prima muta dell'anno principale
-            Muta? mutaB;
-
-            // Cerca una muta con lo stesso nomeMuta nell'anno di confronto
-            try {
-              mutaB = muteAnnoConfrontoLista.firstWhere((mB) => mB.nomeMuta == mutaA.nomeMuta);
-            } catch (e) {
-              // Se non trovi una muta con lo stesso nome, prendi la prima dell'anno di confronto
-              // Questo potrebbe non essere l'ideale se ci sono più mute con nomi diversi.
-              // Una logica più avanzata potrebbe permettere all'utente di selezionare quale muta confrontare.
-              mutaB = muteAnnoConfrontoLista.first;
-            }
-            comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
-          } else {
-            comparisonResultData = {};
+          // Cerca una muta con lo stesso nomeMuta nell'anno di confronto
+          try {
+            mutaB = muteAnnoConfrontoLista.firstWhere((mB) => mB.nomeMuta == mutaA.nomeMuta);
+          } catch (e) {
+            // Se non trovi una muta con lo stesso nome, prendi la prima dell'anno di confronto
+            // Questo potrebbe non essere l'ideale se ci sono più mute con nomi diversi.
+            // Una logica più avanzata potrebbe permettere all'utente di selezionare quale muta confrontare.
+            mutaB = muteAnnoConfrontoLista.first;
           }
-          displayedMute = []; // Non mostrare la lista singola quando c'è un confronto
+          setState(() {
+            comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
+            displayedMute = []; // Non mostrare la lista singola quando c'è un confronto
+          });
+        } else {
+          setState(() {
+            comparisonResultData = {};
+          });
         }
-
-        // Mostra un messaggio se non ci sono dati dopo il tentativo di fetch/confronto
-        if (displayedMute.isEmpty && (comparisonResultData == null || comparisonResultData!.isEmpty) && selectedYear != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Nessuna muta trovata per ${Provider.of<ThemeProvider>(context, listen: false).currentCeroName} nell\'anno $selectedYear per la visualizzazione o il confronto.')),
-          );
-        }
-
       } else {
+        final mute = await DatabaseHelper.instance.readMuteByYearAndCero(selectedYear!, currentCero);
+        setState(() {
+          displayedMute = mute;
+        });
+      }
+
+      // Mostra un messaggio se non ci sono dati dopo il tentativo di fetch/confronto
+      if (displayedMute.isEmpty && (comparisonResultData == null || comparisonResultData!.isEmpty) && selectedYear != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Seleziona un anno per visualizzare le mute.')),
+          SnackBar(content: Text('Nessuna muta trovata per ${Provider.of<ThemeProvider>(context, listen: false).currentCeroName} nell\'anno $selectedYear per la visualizzazione o il confronto.')),
         );
       }
-    });
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Seleziona un anno per visualizzare le mute.')),
+      );
+    }
   }
 
   Map<RuoloMuta, Map<String, _ConfrontoPersona>> _compareMuteDetailed(Muta mutaA, Muta mutaB) {

@@ -135,6 +135,53 @@ CREATE TABLE persone (
     );
   }
 
+  Future<List<int>> getAvailableYears() async {
+    final db = await instance.database;
+    final result = await db.query('mute', columns: ['anno'], distinct: true);
+    return result.map((map) => map['anno'] as int).toList();
+  }
+
+  Future<List<Muta>> readMuteByYearAndCero(int year, CeroType cero) async {
+    final db = await instance.database;
+    final result = await db.query('mute', where: 'anno = ? AND cero = ?', whereArgs: [year, cero.index]);
+    final muteList = <Muta>[];
+    for (var mutaMap in result) {
+      final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [mutaMap['id']]);
+      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+
+      muteList.add(Muta.fromJson({
+        ...mutaMap,
+        'stangaSinistra': stangaSinistra,
+        'stangaDestra': stangaDestra,
+      }));
+    }
+    return muteList;
+  }
+
+  Future<List<Muta>> searchMuteByPerson(String query) async {
+    final db = await instance.database;
+    final personeResult = await db.query('persone', where: 'nome LIKE ? OR cognome LIKE ? OR soprannome LIKE ?', whereArgs: ['%$query%', '%$query%', '%$query%']);
+    final mutaIds = personeResult.map((map) => map['mutaId'] as String).toSet();
+    if (mutaIds.isEmpty) {
+      return [];
+    }
+    final muteResult = await db.query('mute', where: 'id IN (${mutaIds.map((_) => '?').join(', ')})', whereArgs: mutaIds.toList());
+    final muteList = <Muta>[];
+    for (var mutaMap in muteResult) {
+      final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [mutaMap['id']]);
+      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+
+      muteList.add(Muta.fromJson({
+        ...mutaMap,
+        'stangaSinistra': stangaSinistra,
+        'stangaDestra': stangaDestra,
+      }));
+    }
+    return muteList;
+  }
+
   Future close() async {
     final db = await instance.database;
     db.close();

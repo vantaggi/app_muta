@@ -110,13 +110,13 @@ class AppTheme {
         );
       case CeroType.santAntonio:
         return ThemeData.dark().copyWith(
-          primaryColor: Colors.black,
+          primaryColor: _rosso,
           colorScheme: ColorScheme.fromSwatch(
             brightness: Brightness.dark,
             primarySwatch: Colors.grey,
             accentColor: _rosso,
           ).copyWith(
-            primary: Colors.black,
+            primary: _rosso,
             secondary: _rosso,
           ),
           appBarTheme: const AppBarTheme(

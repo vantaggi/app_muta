@@ -97,7 +97,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             // Una logica più avanzata potrebbe permettere all'utente di selezionare quale muta confrontare.
             mutaB = muteAnnoConfrontoLista.first;
           }
-          if (mutaB != null) {
+          if (mutaA != null && mutaB != null) {
             setState(() {
               comparisonResultData = _compareMuteDetailed(mutaA, mutaB);
               displayedMute = []; // Non mostrare la lista singola quando c'è un confronto

@@ -37,7 +37,7 @@ class _MapScreenState extends State<MapScreen> {
                 width: 80.0,
                 height: 80.0,
                 point: LatLng(muta.latitude!, muta.longitude!),
-                builder: (ctx) => GestureDetector(
+                child: GestureDetector(
                   onTap: () {
                     _showMutaDetails(context, muta, themeProvider);
                   },
@@ -65,7 +65,13 @@ class _MapScreenState extends State<MapScreen> {
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: CeroSelector(showAsPopup: true, showFullName: false, onCeroChanged: _loadMute),
+                child: CeroSelector(
+                  showAsPopup: true,
+                  showFullName: false,
+                  onCeroChanged: (CeroType cero) {
+                    _loadMute();
+                  },
+                ),
               ),
             ],
           ),

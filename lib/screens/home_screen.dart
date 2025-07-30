@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
+import 'package:app_muta/models/muta_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

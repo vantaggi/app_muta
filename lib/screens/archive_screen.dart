@@ -129,8 +129,12 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     }
   }
 
-  Map<RuoloMuta, Map<String, _ConfrontoPersona>> _compareMuteDetailed(Muta mutaA, Muta mutaB) {
+  Map<RuoloMuta, Map<String, _ConfrontoPersona>> _compareMuteDetailed(Muta? mutaA, Muta? mutaB) {
     Map<RuoloMuta, Map<String, _ConfrontoPersona>> result = {};
+
+    if (mutaA == null || mutaB == null) {
+      return result;
+    }
 
     for (RuoloMuta ruolo in RuoloMuta.values) {
       Map<String, _ConfrontoPersona> stangheConfronto = {};

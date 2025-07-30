@@ -36,14 +36,21 @@ class _MainNavigatorState extends State<MainNavigator> {
       builder: (context, themeProvider, child) {
         return Scaffold(
           // Il body cambia in base alla selezione nel menu
-          body: Center(
-            child: _widgetOptions.elementAt(_selectedIndex),
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(child: child, opacity: animation);
+            },
+            child: Center(
+              key: ValueKey<int>(_selectedIndex),
+              child: _widgetOptions.elementAt(_selectedIndex),
+            ),
           ),
           // Il menu di navigazione
           bottomNavigationBar: BottomNavigationBar(
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: const Icon(Icons.home),
+                icon: const Icon(Icons.home_outlined),
                 label: 'Home',
                 activeIcon: Icon(
                   Icons.home,
@@ -51,7 +58,7 @@ class _MainNavigatorState extends State<MainNavigator> {
                 ),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.map),
+                icon: const Icon(Icons.map_outlined),
                 label: 'Mappa',
                 activeIcon: Icon(
                   Icons.map,
@@ -67,7 +74,7 @@ class _MainNavigatorState extends State<MainNavigator> {
                 ),
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.archive),
+                icon: const Icon(Icons.archive_outlined),
                 label: 'Archivio',
                 activeIcon: Icon(
                   Icons.archive,

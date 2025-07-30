@@ -83,6 +83,8 @@ class Muta {
   final CeroType cero;
   final String nomeMuta; // Sostituisce numeroMuta
   final String posizione; // Può essere un riferimento geografico più specifico
+  final double? latitude;
+  final double? longitude;
 
   // Liste separate per le stanghe
   final List<PersonaMuta> stangaSinistra;
@@ -100,6 +102,8 @@ class Muta {
     required this.cero,
     required this.nomeMuta,
     required this.posizione,
+    this.latitude,
+    this.longitude,
     required this.stangaSinistra,
     required this.stangaDestra,
     required this.dataCreazione,
@@ -160,6 +164,8 @@ class Muta {
       'cero': cero.index,
       'nomeMuta': nomeMuta,
       'posizione': posizione,
+      'latitude': latitude,
+      'longitude': longitude,
       'stangaSinistra': stangaSinistra.map((p) => p.toJson()).toList(),
       'stangaDestra': stangaDestra.map((p) => p.toJson()).toList(),
       'dataCreazione': dataCreazione.millisecondsSinceEpoch,
@@ -177,6 +183,8 @@ class Muta {
       cero: CeroType.values[json['cero']],
       nomeMuta: json['nomeMuta'],
       posizione: json['posizione'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
       stangaSinistra: (json['stangaSinistra'] as List)
           .map((p) => PersonaMuta.fromJson(p))
           .toList(),
@@ -199,6 +207,8 @@ class Muta {
     CeroType? cero,
     String? nomeMuta,
     String? posizione,
+    double? latitude,
+    double? longitude,
     List<PersonaMuta>? stangaSinistra,
     List<PersonaMuta>? stangaDestra,
     DateTime? dataCreazione,
@@ -213,6 +223,8 @@ class Muta {
       cero: cero ?? this.cero,
       nomeMuta: nomeMuta ?? this.nomeMuta,
       posizione: posizione ?? this.posizione,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       stangaSinistra: stangaSinistra ?? this.stangaSinistra,
       stangaDestra: stangaDestra ?? this.stangaDestra,
       dataCreazione: dataCreazione ?? this.dataCreazione,

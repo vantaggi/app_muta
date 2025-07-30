@@ -3,15 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
 import 'package:app_muta/models/muta_model.dart';
+import 'package:app_muta/services/database_helper.dart';
 import 'package:app_muta/theme/app_theme.dart'; // Per CeroType
 import 'dart:ui' as ui; // Per Image rendering
 import 'package:flutter/rendering.dart';
 import 'dart:typed_data'; // Import per ByteData e Uint8List
-
-// Per la condivisione, potresti aver bisogno di 'share_plus' o 'path_provider'
-// import 'package:share_plus/share_plus.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'dart:io'; // Per File operations
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class CreateMutaScreen extends StatefulWidget {
   const CreateMutaScreen({super.key});
@@ -24,6 +23,8 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeMutaController = TextEditingController();
   final _posizioneController = TextEditingController();
+  final _latitudeController = TextEditingController();
+  final _longitudeController = TextEditingController();
   final _noteMutaController = TextEditingController(); // Note generali per la muta
   final _annoController = TextEditingController(text: DateTime.now().year.toString());
 
@@ -52,6 +53,8 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
   void dispose() {
     _nomeMutaController.dispose();
     _posizioneController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     _noteMutaController.dispose();
     _annoController.dispose();
 
@@ -169,11 +172,16 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
     }
 
 
+    double? latitude = double.tryParse(_latitudeController.text.trim());
+    double? longitude = double.tryParse(_longitudeController.text.trim());
+
     return Muta(
       id: DateTime.now().millisecondsSinceEpoch.toString(), // ID Provvisorio, il backend dovrebbe generarne uno univoco
       cero: themeProvider.currentCero,
       nomeMuta: _nomeMutaController.text.trim(),
       posizione: _posizioneController.text.trim(),
+      latitude: latitude,
+      longitude: longitude,
       stangaSinistra: sSinistra,
       stangaDestra: sDestra,
       dataCreazione: DateTime.now(),
@@ -203,42 +211,21 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
   Future<void> _saveMuta(ThemeProvider themeProvider) async {
     final muta = _collectMutaData(themeProvider);
     if (muta != null) {
-      // TODO: Implementare il salvataggio su Firebase Firestore
-      // Esempio:
-      // try {
-      //   String docId = FirebaseFirestore.instance.collection('mute').doc().id; // Genera ID server-side
-      //   Muta mutaConIdServer = muta.copyWith(id: docId); // Aggiorna l'ID nel modello locale
-      //   await FirebaseFirestore.instance.collection('mute').doc(docId).set(mutaConIdServer.toJson());
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('Muta "${muta.nomeMuta}" salvata con successo!'),
-      //       backgroundColor: Colors.green,
-      //     ),
-      //   );
-      //  _resetForm();
-      // } catch (e) {
-      //    print("Errore salvataggio muta: $e");
-      //    ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text('Errore durante il salvataggio della muta: $e'), backgroundColor: Colors.red),
-      //   );
-      // }
-
-      // Simula salvataggio
-      print('Salvataggio Muta: ${muta.nomeMuta} per Cero: ${muta.cero.toString()} Anno: ${muta.anno}');
-      print('ID: ${muta.id}');
-      print('Posizione: ${muta.posizione}');
-      muta.stangaSinistra.forEach((p) => print('  Sinistra ${p.ruoloDescrizione}: ${p.nomeCompleto} ${p.note != null ? "(${p.note})" : ""}'));
-      muta.stangaDestra.forEach((p) => print('  Destra ${p.ruoloDescrizione}: ${p.nomeCompleto} ${p.note != null ? "(${p.note})" : ""}'));
-      if(muta.note != null) print('Note Muta: ${muta.note}');
-
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Muta "${muta.nomeMuta}" salvata per ${themeProvider.currentCeroName}! (Simulazione)'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _resetForm();
+      try {
+        await DatabaseHelper.instance.insertMuta(muta);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Muta "${muta.nomeMuta}" salvata con successo!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _resetForm();
+      } catch (e) {
+        print("Errore salvataggio muta: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Errore durante il salvataggio della muta: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -247,6 +234,8 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
     // Resetta i controller manualmente
     _nomeMutaController.clear();
     _posizioneController.clear();
+    _latitudeController.clear();
+    _longitudeController.clear();
     _noteMutaController.clear();
     _annoController.text = DateTime.now().year.toString(); // Reimposta all'anno corrente
     _stangaSinistraControllers.values.forEach((list) => list.forEach((c) => c.clear()));
@@ -277,17 +266,11 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
 
                   Navigator.pop(dialogContext);
 
-                  // TODO: Implementare la condivisione effettiva con share_plus e path_provider
-                  // Esempio:
-                  // final directory = await getTemporaryDirectory();
-                  // final imagePath = '${directory.path}/muta_${muta.id}_${DateTime.now().millisecondsSinceEpoch}.png';
-                  // final imageFile = File(imagePath);
-                  // await imageFile.writeAsBytes(pngBytes);
-                  // await Share.shareXFiles([XFile(imageFile.path)], text: 'Muta: ${muta.nomeMuta} (${muta.anno}) - Cero di ${muta.ceroNome}');
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Immagine Muta "${muta.nomeMuta}" generata! (Condivisione da implementare)'), backgroundColor: themeProvider.currentPrimaryColor),
-                  );
+                  final directory = await getTemporaryDirectory();
+                  final imagePath = '${directory.path}/muta_${muta.id}_${DateTime.now().millisecondsSinceEpoch}.png';
+                  final imageFile = File(imagePath);
+                  await imageFile.writeAsBytes(pngBytes);
+                  await Share.shareXFiles([XFile(imageFile.path)], text: 'Muta: ${muta.nomeMuta} (${muta.anno}) - Cero di ${muta.ceroNome}');
 
                 } catch (e) {
                   print("Errore durante la cattura o condivisione dell'immagine: $e");
@@ -403,6 +386,27 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
                             if (v.length != 4) return 'Formato YYYY'; // Anno a 4 cifre
                             return null;
                           },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _latitudeController,
+                          decoration: const InputDecoration(labelText: 'Latitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _longitudeController,
+                          decoration: const InputDecoration(labelText: 'Longitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                          keyboardType: TextInputType.number,
                         ),
                       ),
                     ],

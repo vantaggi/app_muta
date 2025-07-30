@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_muta/theme/theme_provider.dart';
 import 'package:app_muta/widgets/cero_selector.dart';
-import 'package:app_muta/models/muta_model.dart'; // Assicurati che il percorso sia corretto
-import 'package:app_muta/theme/app_theme.dart'; // Per CeroType
+import 'package:app_muta/models/muta_model.dart';
+import 'package:app_muta/services/database_helper.dart';
+import 'package:app_muta/theme/app_theme.dart';
 
 class ArchiveScreen extends StatefulWidget {
   const ArchiveScreen({super.key});
@@ -16,100 +17,55 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   int? selectedYear;
   int? comparisonYear;
 
-  final List<int> availableYears = List.generate(15, (index) => DateTime.now().year - index); // Ultimi 15 anni
-
-  // Dati Mock Aggiornati - SOSTITUIRE CON FETCH DA DATABASE
-  final List<Muta> allMuteData = [
-    // Sant'Ubaldo
-    Muta(
-      id: 'su_2024_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2024, dataCreazione: DateTime(2024),
-      stangaSinistra: [
-        PersonaMuta(nome: 'Mario', cognome: 'Rossi', soprannome: 'Fulmine', ruolo: RuoloMuta.puntaAvanti, note: 'Capostanga'),
-        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro),
-      ],
-      stangaDestra: [
-        PersonaMuta(nome: 'Luca', cognome: 'Bianchi', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
-      ],
-      note: 'Prima muta importante della corsa.',
-    ),
-    Muta(
-      id: 'su_2023_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2023, dataCreazione: DateTime(2023),
-      stangaSinistra: [
-        PersonaMuta(nome: 'Mario', cognome: 'Rossi', soprannome: 'Fulmine', ruolo: RuoloMuta.puntaAvanti, note: 'Capostanga'), // Confermato
-        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti), // Confermato
-        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro), // Confermato
-        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro), // Confermato
-      ],
-      stangaDestra: [
-        PersonaMuta(nome: 'Sergio', cognome: 'Azzurri', soprannome: 'Lampo', ruolo: RuoloMuta.puntaAvanti), // Luca Bianchi è uscito, Sergio Azzurri è entrato
-        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti), // Confermato
-        PersonaMuta(nome: 'Andrea', cognome: 'Blu', ruolo: RuoloMuta.ceppoDietro), // Confermato
-        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro), // Confermato
-      ],
-    ),
-    Muta(
-      id: 'su_2022_calataneri', cero: CeroType.santUbaldo, nomeMuta: 'Muta Calata dei Neri', posizione: 'Inizio Calata dei Neri', anno: 2022, dataCreazione: DateTime(2022),
-      stangaSinistra: [
-        PersonaMuta(nome: 'Matteo', cognome: 'Bruni', ruolo: RuoloMuta.puntaAvanti), // Mario Rossi è uscito, Matteo Bruni è entrato
-        PersonaMuta(nome: 'Paolo', cognome: 'Verdi', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Franco', cognome: 'Gialli', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Simone', cognome: 'Arancio', ruolo: RuoloMuta.puntaDietro),
-      ],
-      stangaDestra: [
-        PersonaMuta(nome: 'Sergio', cognome: 'Azzurri', soprannome: 'Lampo', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Toro', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Leonardo', cognome: 'Rosa', ruolo: RuoloMuta.ceppoDietro), // Andrea Blu è uscito, Leonardo Rosa è entrato
-        PersonaMuta(nome: 'Marco', cognome: 'Viola', ruolo: RuoloMuta.puntaDietro),
-      ],
-    ),
-    // San Giorgio
-    Muta(
-      id: 'sg_2024_pzagrande', cero: CeroType.sanGiorgio, nomeMuta: 'Muta Piazza Grande', posizione: 'Centro Piazza Grande', anno: 2024, dataCreazione: DateTime(2024),
-      stangaSinistra: [
-        PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro),
-      ],
-      stangaDestra: [
-        PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Stefano', cognome: 'Spada', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
-      ],
-    ),
-    Muta(
-      id: 'sg_2023_pzagrande', cero: CeroType.sanGiorgio, nomeMuta: 'Muta Piazza Grande', posizione: 'Centro Piazza Grande', anno: 2023, dataCreazione: DateTime(2023),
-      stangaSinistra: [
-        PersonaMuta(nome: 'Giorgio', cognome: 'Dragoni', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Umberto', cognome: 'Scudo', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Massimo', cognome: 'Elmo', ruolo: RuoloMuta.ceppoDietro),
-        PersonaMuta(nome: 'Enrico', cognome: 'Cavallo', ruolo: RuoloMuta.puntaDietro),
-      ],
-      stangaDestra: [
-        PersonaMuta(nome: 'Guido', cognome: 'Lancia', ruolo: RuoloMuta.puntaAvanti),
-        PersonaMuta(nome: 'Teodoro', cognome: 'Corazza', ruolo: RuoloMuta.ceppoAvanti),
-        PersonaMuta(nome: 'Vittorio', cognome: 'Ascia', soprannome:'Taglio', ruolo: RuoloMuta.ceppoDietro), // Stefano Spada è uscito
-        PersonaMuta(nome: 'Davide', cognome: 'Stendardo', ruolo: RuoloMuta.puntaDietro),
-      ],
-    ),
-  ];
+  List<int> availableYears = [];
+  List<Muta> allMuteData = [];
 
   List<Muta> displayedMute = [];
   Map<RuoloMuta, Map<String, _ConfrontoPersona>>? comparisonResultData;
 
   late ThemeProvider _themeProvider;
 
+  void _searchPerson(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        displayedMute = [];
+      });
+      return;
+    }
+
+    final lowerCaseQuery = query.toLowerCase();
+    final results = allMuteData.where((muta) {
+      return muta.stangaSinistra.any((p) =>
+          p.nome.toLowerCase().contains(lowerCaseQuery) ||
+          p.cognome.toLowerCase().contains(lowerCaseQuery) ||
+          (p.soprannome?.toLowerCase().contains(lowerCaseQuery) ?? false)) ||
+          muta.stangaDestra.any((p) =>
+          p.nome.toLowerCase().contains(lowerCaseQuery) ||
+          p.cognome.toLowerCase().contains(lowerCaseQuery) ||
+          (p.soprannome?.toLowerCase().contains(lowerCaseQuery) ?? false));
+    }).toList();
+
+    setState(() {
+      displayedMute = results;
+      comparisonResultData = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     _themeProvider.addListener(_onCeroChanged);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final mute = await DatabaseHelper.instance.readAllMute();
+    setState(() {
+      allMuteData = mute;
+      availableYears = mute.map((m) => m.anno).toSet().toList();
+      availableYears.sort((a, b) => b.compareTo(a));
+    });
   }
 
   @override
@@ -124,6 +80,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       comparisonYear = null;
       displayedMute = [];
       comparisonResultData = null;
+      _loadData();
     });
   }
 
@@ -337,6 +294,18 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
                         )
                     ),
                     onPressed: selectedYear != null ? _fetchAndDisplayMute : null, // Abilitato solo se l'anno principale è selezionato
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  onChanged: _searchPerson,
+                  decoration: InputDecoration(
+                    labelText: 'Cerca Persona',
+                    hintText: 'Nome, Cognome o Soprannome',
+                    prefixIcon: Icon(Icons.search, color: themeProvider.currentPrimaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
               ],

@@ -3,6 +3,11 @@ import 'package:path/path.dart';
 import 'package:app_muta/models/muta_model.dart';
 import 'package:app_muta/theme/app_theme.dart';
 
+// IMPORTANT NOTE FOR THE DEVELOPER:
+// Since the database schema has been changed, the old database on the device/emulator
+// must be deleted for the changes to take effect.
+// Please UNINSTALL the app completely from your test device and then run it again.
+// This will trigger the `onCreate` method with the new, corrected schema.
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
@@ -25,6 +30,7 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     const idType = 'TEXT PRIMARY KEY';
     const textType = 'TEXT NOT NULL';
+    const nullableTextType = 'TEXT'; // For nullable text columns
     const intType = 'INTEGER NOT NULL';
     const boolType = 'BOOLEAN NOT NULL';
     const realType = 'REAL';
@@ -38,9 +44,9 @@ CREATE TABLE mute (
   latitude $realType,
   longitude $realType,
   dataCreazione $textType,
-  dataModifica $textType,
+  dataModifica $nullableTextType,
   anno $intType,
-  note $textType,
+  note $nullableTextType,
   verificata $boolType,
   numeroVerifiche $intType
   )

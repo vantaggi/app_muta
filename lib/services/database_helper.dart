@@ -111,11 +111,22 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      return Muta.fromJson({
-        ...mutaMap,
-        'stangaSinistra': stangaSinistra,
-        'stangaDestra': stangaDestra,
-      });
+      return Muta(
+        id: mutaMap['id'] as String,
+        cero: CeroType.values[mutaMap['cero'] as int],
+        nomeMuta: mutaMap['nomeMuta'] as String,
+        posizione: mutaMap['posizione'] as String,
+        latitude: mutaMap['latitude'] as double?,
+        longitude: mutaMap['longitude'] as double?,
+        stangaSinistra: stangaSinistra,
+        stangaDestra: stangaDestra,
+        dataCreazione: DateTime.parse(mutaMap['dataCreazione'] as String),
+        dataModifica: mutaMap['dataModifica'] != null ? DateTime.parse(mutaMap['dataModifica'] as String) : null,
+        anno: mutaMap['anno'] as int,
+        note: mutaMap['note'] as String?,
+        verificata: (mutaMap['verificata'] as int) == 1,
+        numeroVerifiche: mutaMap['numeroVerifiche'] as int?,
+      );
     } else {
       throw Exception('ID $id not found');
     }
@@ -130,11 +141,22 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta.fromJson({
-        ...mutaMap,
-        'stangaSinistra': stangaSinistra,
-        'stangaDestra': stangaDestra,
-      }));
+      muteList.add(Muta(
+        id: mutaMap['id'] as String,
+        cero: CeroType.values[mutaMap['cero'] as int],
+        nomeMuta: mutaMap['nomeMuta'] as String,
+        posizione: mutaMap['posizione'] as String,
+        latitude: mutaMap['latitude'] as double?,
+        longitude: mutaMap['longitude'] as double?,
+        stangaSinistra: stangaSinistra,
+        stangaDestra: stangaDestra,
+        dataCreazione: DateTime.parse(mutaMap['dataCreazione'] as String),
+        dataModifica: mutaMap['dataModifica'] != null ? DateTime.parse(mutaMap['dataModifica'] as String) : null,
+        anno: mutaMap['anno'] as int,
+        note: mutaMap['note'] as String?,
+        verificata: (mutaMap['verificata'] as int) == 1,
+        numeroVerifiche: mutaMap['numeroVerifiche'] as int?,
+      ));
     }
     return muteList;
   }
@@ -173,11 +195,22 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta.fromJson({
-        ...mutaMap,
-        'stangaSinistra': stangaSinistra,
-        'stangaDestra': stangaDestra,
-      }));
+      muteList.add(Muta(
+        id: mutaMap['id'] as String,
+        cero: CeroType.values[mutaMap['cero'] as int],
+        nomeMuta: mutaMap['nomeMuta'] as String,
+        posizione: mutaMap['posizione'] as String,
+        latitude: mutaMap['latitude'] as double?,
+        longitude: mutaMap['longitude'] as double?,
+        stangaSinistra: stangaSinistra,
+        stangaDestra: stangaDestra,
+        dataCreazione: DateTime.parse(mutaMap['dataCreazione'] as String),
+        dataModifica: mutaMap['dataModifica'] != null ? DateTime.parse(mutaMap['dataModifica'] as String) : null,
+        anno: mutaMap['anno'] as int,
+        note: mutaMap['note'] as String?,
+        verificata: (mutaMap['verificata'] as int) == 1,
+        numeroVerifiche: mutaMap['numeroVerifiche'] as int?,
+      ));
     }
     return muteList;
   }
@@ -196,11 +229,22 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta.fromJson({
-        ...mutaMap,
-        'stangaSinistra': stangaSinistra,
-        'stangaDestra': stangaDestra,
-      }));
+      muteList.add(Muta(
+        id: mutaMap['id'] as String,
+        cero: CeroType.values[mutaMap['cero'] as int],
+        nomeMuta: mutaMap['nomeMuta'] as String,
+        posizione: mutaMap['posizione'] as String,
+        latitude: mutaMap['latitude'] as double?,
+        longitude: mutaMap['longitude'] as double?,
+        stangaSinistra: stangaSinistra,
+        stangaDestra: stangaDestra,
+        dataCreazione: DateTime.parse(mutaMap['dataCreazione'] as String),
+        dataModifica: mutaMap['dataModifica'] != null ? DateTime.parse(mutaMap['dataModifica'] as String) : null,
+        anno: mutaMap['anno'] as int,
+        note: mutaMap['note'] as String?,
+        verificata: (mutaMap['verificata'] as int) == 1,
+        numeroVerifiche: mutaMap['numeroVerifiche'] as int?,
+      ));
     }
     return muteList;
   }

@@ -512,10 +512,3 @@ class _MutaDisplayCard extends StatelessWidget {
   }
 }
 
-// Estensione per capitalizzare la prima lettera di una stringa
-extension StringExtension on String {
-  String capitalizeFirstLetter() {
-    if (isEmpty) return "";
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
-  }
-}

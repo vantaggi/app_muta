@@ -50,7 +50,7 @@ class ExportHelper {
                     _buildPdfParticipantRow(muta, RuoloMuta.puntaDietro),
                   ],
                 ),
-              )
+              ),
               if (muta.note != null && muta.note!.isNotEmpty)
                 pw.Padding(
                   padding: const pw.EdgeInsets.only(top: 20),

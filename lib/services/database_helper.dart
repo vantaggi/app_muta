@@ -66,9 +66,9 @@ CREATE TABLE persone (
   isSinistra $boolType,
   nome $textType,
   cognome $textType,
-  soprannome $textType,
+  soprannome $nullableTextType,
   ruolo $intType,
-  note $textType,
+  note $nullableTextType,
   FOREIGN KEY (mutaId) REFERENCES mute (id) ON DELETE CASCADE
 )
 ''');

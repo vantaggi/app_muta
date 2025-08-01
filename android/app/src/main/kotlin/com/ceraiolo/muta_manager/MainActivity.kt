@@ -1,4 +1,4 @@
-package com.ceraiolo.app_muta.app_muta
+package com.ceraiolo.muta_manager
 
 import io.flutter.embedding.android.FlutterActivity
 

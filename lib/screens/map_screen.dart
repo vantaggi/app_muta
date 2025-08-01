@@ -220,10 +220,6 @@ class _MapScreenState extends State<MapScreen> {
                       maxClusterRadius: 45,
                       size: const Size(40, 40),
                       alignment: Alignment.center,
-                      fitBoundsOptions: const FitBoundsOptions(
-                        padding: EdgeInsets.all(50),
-                        maxZoom: 15,
-                      ),
                       markers: markers,
                       builder: (context, markers) {
                         return Container(

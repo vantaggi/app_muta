@@ -139,12 +139,12 @@ void main() {
       });
 
       test('Search Mute by Person', () async {
-        final persone1 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        final persone1 = List.generate(8, (i) => _createDummyPersona('Dummy', 'User$i'));
         persone1[0] = _createDummyPersona('Giovanni', 'Bianchi');
         final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: persone1);
         await dbHelper.insertMuta(muta1);
 
-        final persone2 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        final persone2 = List.generate(8, (i) => _createDummyPersona('Dummy', 'User$i'));
         persone2[1] = _createDummyPersona('Giovanni', 'Verdi', soprannome: 'Gio');
         final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: persone2);
         await dbHelper.insertMuta(muta2);

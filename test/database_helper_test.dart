@@ -18,6 +18,7 @@ void main() {
     late DatabaseHelper dbHelper;
 
     setUp(() async {
+      DatabaseHelper.resetInstance();
       dbHelper = DatabaseHelper.instance;
       // Make sure we have a clean database for each test by deleting the old one
       final dbPath = await getDatabasesPath();

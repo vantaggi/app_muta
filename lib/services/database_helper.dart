@@ -10,10 +10,16 @@ import 'package:app_muta/theme/app_theme.dart';
 // Please UNINSTALL the app completely from your test device and then run it again.
 // This will trigger the `onCreate` method with the new, corrected schema.
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
+  static DatabaseHelper? _instance;
+  static final DatabaseHelper instance = _instance ??= DatabaseHelper._init();
   static Database? _database;
 
   DatabaseHelper._init();
+
+  static void resetInstance() {
+    _database = null;
+    _instance = null;
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;

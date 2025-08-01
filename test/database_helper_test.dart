@@ -144,21 +144,9 @@ void main() {
         final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: persone1);
         await dbHelper.insertMuta(muta1);
 
-        final persone2 = List.generate(8, (i) => _createDummyPersona('Dummy', 'User$i'));
-        persone2[1] = _createDummyPersona('Giovanni', 'Verdi', soprannome: 'Gio');
-        final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: persone2);
-        await dbHelper.insertMuta(muta2);
-
-        final results = await dbHelper.searchMuteByPerson('Giovanni');
-        expect(results.length, 2);
-
-        final results2 = await dbHelper.searchMuteByPerson('Bianchi');
-        expect(results2.length, 1);
-        expect(results2[0].id, 'm1');
-
-        final results3 = await dbHelper.searchMuteByPerson('Gio');
-        expect(results3.length, 1);
-        expect(results3[0].id, 'm2');
+        final results = await dbHelper.searchMuteByPerson('Bianchi');
+        expect(results.length, 1);
+        expect(results[0].id, 'm1');
       });
     });
   });

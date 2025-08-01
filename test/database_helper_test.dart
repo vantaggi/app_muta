@@ -1,8 +1,8 @@
 import 'package:path/path.dart';
-import 'package:app_muta/models/ceraiolo_model.dart';
-import 'package:app_muta/models/muta_model.dart';
-import 'package:app_muta/services/database_helper.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/models/ceraiolo_model.dart';
+import 'package:muta_manager/models/muta_model.dart';
+import 'package:muta_manager/services/database_helper.dart';
+import 'package:muta_manager/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:uuid/uuid.dart';
@@ -35,7 +35,7 @@ void main() {
 
     group('Ceraioli CRUD', () {
       test('Insert and Read Ceraiolo', () async {
-        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi');
+        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi', cero: CeroType.santUbaldo);
         await dbHelper.insertCeraiolo(ceraiolo);
 
         final readCeraiolo = await dbHelper.readCeraiolo('1');
@@ -44,8 +44,8 @@ void main() {
       });
 
       test('Read All Ceraioli', () async {
-        await dbHelper.insertCeraiolo(Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi'));
-        await dbHelper.insertCeraiolo(Ceraiolo(id: '2', nome: 'Luigi', cognome: 'Verdi'));
+        await dbHelper.insertCeraiolo(Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi', cero: CeroType.santUbaldo));
+        await dbHelper.insertCeraiolo(Ceraiolo(id: '2', nome: 'Luigi', cognome: 'Verdi', cero: CeroType.santUbaldo));
 
         final ceraioli = await dbHelper.readAllCeraioli();
         expect(ceraioli.length, 2);
@@ -55,10 +55,10 @@ void main() {
       });
 
       test('Update Ceraiolo', () async {
-        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi');
+        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi', cero: CeroType.santUbaldo);
         await dbHelper.insertCeraiolo(ceraiolo);
 
-        final updatedCeraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Bianchi');
+        final updatedCeraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Bianchi', cero: CeroType.santUbaldo);
         await dbHelper.updateCeraiolo(updatedCeraiolo);
 
         final readCeraiolo = await dbHelper.readCeraiolo('1');
@@ -66,7 +66,7 @@ void main() {
       });
 
       test('Delete Ceraiolo', () async {
-        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi');
+        final ceraiolo = Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi', cero: CeroType.santUbaldo);
         await dbHelper.insertCeraiolo(ceraiolo);
 
         await dbHelper.deleteCeraiolo('1');
@@ -75,9 +75,9 @@ void main() {
       });
 
       test('Search Ceraioli', () async {
-        await dbHelper.insertCeraiolo(Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi'));
-        await dbHelper.insertCeraiolo(Ceraiolo(id: '2', nome: 'Luigi', cognome: 'Verdi', soprannome: 'Gigi'));
-        await dbHelper.insertCeraiolo(Ceraiolo(id: '3', nome: 'Maria', cognome: 'Neri'));
+        await dbHelper.insertCeraiolo(Ceraiolo(id: '1', nome: 'Mario', cognome: 'Rossi', cero: CeroType.santUbaldo));
+        await dbHelper.insertCeraiolo(Ceraiolo(id: '2', nome: 'Luigi', cognome: 'Verdi', soprannome: 'Gigi', cero: CeroType.santUbaldo));
+        await dbHelper.insertCeraiolo(Ceraiolo(id: '3', nome: 'Maria', cognome: 'Neri', cero: CeroType.sanGiorgio));
 
         final results = await dbHelper.searchCeraioli('mar');
         expect(results.length, 2);

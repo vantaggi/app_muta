@@ -1,6 +1,6 @@
-import 'package:app_muta/theme/app_theme.dart';
-import 'package:app_muta/theme/theme_provider.dart';
-import 'package:app_muta/widgets/cero_selector.dart';
+import 'package:muta_manager/theme/app_theme.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:muta_manager/widgets/cero_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';

@@ -1,3 +1,4 @@
+import 'package:app_muta/models/ceraiolo_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_muta/theme/theme_provider.dart';
@@ -71,10 +72,34 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: controllers[0], // Nome
-          decoration: const InputDecoration(labelText: 'Nome', border: OutlineInputBorder(), isDense: true),
-          validator: (value) => (value == null || value.isEmpty) ? 'Richiesto' : null,
+        Autocomplete<Ceraiolo>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text == '') {
+              return const Iterable<Ceraiolo>.empty();
+            }
+            return DatabaseHelper.instance.searchCeraioli(textEditingValue.text);
+          },
+          displayStringForOption: (Ceraiolo option) => '${option.nome} ${option.cognome}',
+          fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            // This is a bit of a hack to make the Autocomplete controller update our controller
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if(controllers[0].text != fieldTextEditingController.text) {
+                controllers[0].text = fieldTextEditingController.text;
+              }
+            });
+            return TextFormField(
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
+              decoration: const InputDecoration(labelText: 'Nome', border: OutlineInputBorder(), isDense: true),
+              validator: (value) => (value == null || value.isEmpty) ? 'Richiesto' : null,
+            );
+          },
+          onSelected: (Ceraiolo selection) {
+            controllers[0].text = selection.nome;
+            controllers[1].text = selection.cognome;
+            controllers[2].text = selection.soprannome ?? '';
+          },
         ),
         const SizedBox(height: 8),
         TextFormField(

@@ -1,3 +1,4 @@
+import 'package:app_muta/screens/ceraioli_screen.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:app_muta/services/database_helper.dart';
@@ -188,60 +189,88 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
+                  Column(
                     children: [
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Visualizza Mappa',
-                          Icons.map,
-                              () => _navigateToTab(context, 1),
-                        ),
-                      ),
-                      // Use Padding instead of SizedBox for flexible spacing
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0), // Half of 12.0 on each side
-                        child: Container(), // An empty container for the padding
-                      ),
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Crea Muta',
-                          Icons.add_circle_outline,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildQuickActionCard(
+                              context,
+                              'Crea Muta',
+                              Icons.add_circle_outline,
                               () => _navigateToTab(context, 2),
-                        ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildQuickActionCard(
+                              context,
+                              'Gestisci Ceraioli',
+                              Icons.people,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const CeraioliScreen()),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildQuickActionCard(
+                              context,
+                              'Visualizza Mappa',
+                              Icons.map,
+                              () => _navigateToTab(context, 1),
+                            ),
+                          ),
+                           const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildQuickActionCard(
+                              context,
+                              'Importa/Esporta',
+                              Icons.import_export,
+                              () => _showImportExportDialog(context),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Importa Dati',
-                          Icons.file_upload,
-                          () => _importData(context),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                        child: Container(),
-                      ),
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Esporta Dati',
-                          Icons.file_download,
-                          () => _exportData(context),
-                        ),
-                      ),
-                    ],
-                  ),
+                  )
                 ],
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showImportExportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Importa/Esporta Dati'),
+          content: const Text('Vuoi importare o esportare i dati delle mute?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _importData(context);
+              },
+              child: const Text('Importa'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _exportData(context);
+              },
+              child: const Text('Esporta'),
+            ),
+          ],
         );
       },
     );
@@ -309,6 +338,34 @@ class _HomeScreenState extends State<HomeScreen> {
         content: Text('Navigazione alla tab $tabIndex'),
         duration: const Duration(seconds: 1),
       ),
+    );
+  }
+
+  void _showImportExportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Importa/Esporta Dati'),
+          content: const Text('Vuoi importare o esportare i dati delle mute?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _importData(context);
+              },
+              child: const Text('Importa'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _exportData(context);
+              },
+              child: const Text('Esporta'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

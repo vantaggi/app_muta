@@ -1,3 +1,4 @@
+import 'package:app_muta/models/ceraiolo_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:app_muta/models/muta_model.dart';
@@ -63,6 +64,15 @@ CREATE TABLE persone (
   ruolo $intType,
   note $textType,
   FOREIGN KEY (mutaId) REFERENCES mute (id) ON DELETE CASCADE
+)
+''');
+
+    await db.execute('''
+CREATE TABLE ceraioli (
+  id $idType,
+  nome $textType,
+  cognome $textType,
+  soprannome $nullableTextType
 )
 ''');
   }
@@ -192,5 +202,67 @@ CREATE TABLE persone (
   Future close() async {
     final db = await instance.database;
     db.close();
+  }
+
+  // Ceraioli CRUD Methods
+
+  Future<void> insertCeraiolo(Ceraiolo ceraiolo) async {
+    final db = await instance.database;
+    await db.insert('ceraioli', ceraiolo.toJson());
+  }
+
+  Future<Ceraiolo> readCeraiolo(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'ceraioli',
+      columns: ['id', 'nome', 'cognome', 'soprannome'],
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Ceraiolo.fromJson(maps.first);
+    } else {
+      throw Exception('ID $id not found');
+    }
+  }
+
+  Future<List<Ceraiolo>> readAllCeraioli() async {
+    final db = await instance.database;
+    final result = await db.query('ceraioli', orderBy: 'cognome ASC, nome ASC');
+    return result.map((json) => Ceraiolo.fromJson(json)).toList();
+  }
+
+  Future<int> updateCeraiolo(Ceraiolo ceraiolo) async {
+    final db = await instance.database;
+    return db.update(
+      'ceraioli',
+      ceraiolo.toJson(),
+      where: 'id = ?',
+      whereArgs: [ceraiolo.id],
+    );
+  }
+
+  Future<int> deleteCeraiolo(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'ceraioli',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<Ceraiolo>> searchCeraioli(String query) async {
+    final db = await instance.database;
+    if (query.isEmpty) {
+      return [];
+    }
+    final result = await db.query(
+      'ceraioli',
+      where: 'nome LIKE ? OR cognome LIKE ? OR soprannome LIKE ?',
+      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      orderBy: 'cognome ASC, nome ASC',
+    );
+    return result.map((json) => Ceraiolo.fromJson(json)).toList();
   }
 }

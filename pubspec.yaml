@@ -37,6 +37,7 @@ dependencies:
   google_maps_flutter: ^2.5.0
   file_picker: ^10.2.0
   flutter_map: ^6.0.0
+  uuid: ^4.4.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -46,6 +47,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
+  sqflite_common_ffi: ^2.3.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

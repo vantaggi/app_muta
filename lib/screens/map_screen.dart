@@ -219,7 +219,7 @@ class _MapScreenState extends State<MapScreen> {
                     options: MarkerClusterLayerOptions(
                       maxClusterRadius: 45,
                       size: const Size(40, 40),
-                      anchor: AnchorPos.align(AnchorAlign.center),
+                      alignment: Alignment.center,
                       fitBoundsOptions: const FitBoundsOptions(
                         padding: EdgeInsets.all(50),
                         maxZoom: 15,
@@ -244,9 +244,13 @@ class _MapScreenState extends State<MapScreen> {
                       },
                     ),
                   ),
-                  AttributionWidget.defaultWidget(
-                    source: 'OpenStreetMap contributors',
-                    onSourceTapped: null,
+                  RichAttributionWidget(
+                    attributions: [
+                      TextSourceAttribution(
+                        'OpenStreetMap contributors',
+                        onTap: () => launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+                      ),
+                    ],
                   ),
                 ],
               ),

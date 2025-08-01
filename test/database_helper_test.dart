@@ -18,11 +18,13 @@ void main() {
 
     setUp(() async {
       dbHelper = DatabaseHelper.instance;
-      // Make sure we have a clean database for each test
-      await dbHelper.database;
-      await dbHelper.close();
-      await deleteDatabase(await getDatabasesPath() + '/muta.db');
+      // Make sure we have a clean database for each test by deleting the old one
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'muta.db');
+      await deleteDatabase(path);
+      // Re-initialize the database
       dbHelper = DatabaseHelper.instance;
+      await dbHelper.database;
     });
 
     tearDown(() async {
@@ -101,8 +103,8 @@ void main() {
           nomeMuta: 'Test Muta $id',
           posizione: 'Test Posizione',
           dataCreazione: DateTime.now(),
-          stangaSinistra: persone.where((p) => persone.indexOf(p) < 4).toList(),
-          stangaDestra: persone.where((p) => persone.indexOf(p) >= 4).toList(),
+          stangaSinistra: persone.sublist(0, 4),
+          stangaDestra: persone.sublist(4, 8),
         );
       }
 
@@ -116,16 +118,17 @@ void main() {
       }
 
       test('Read Mute by Year and Cero', () async {
-        final persona1 = _createDummyPersona('Paolo', 'Azzurri');
-        final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: [persona1]);
+        final persone1 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        persone1[0] = _createDummyPersona('Paolo', 'Azzurri');
+        final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: persone1);
         await dbHelper.insertMuta(muta1);
 
-        final persona2 = _createDummyPersona('Marco', 'Gialli');
-        final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: [persona2]);
+        final persone2 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: persone2);
         await dbHelper.insertMuta(muta2);
 
-        final persona3 = _createDummyPersona('Luca', 'Neri');
-        final muta3 = _createDummyMuta(id: 'm3', anno: 2024, cero: CeroType.santUbaldo, persone: [persona3]);
+        final persone3 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        final muta3 = _createDummyMuta(id: 'm3', anno: 2024, cero: CeroType.santUbaldo, persone: persone3);
         await dbHelper.insertMuta(muta3);
 
         final results = await dbHelper.readMuteByYearAndCero(2023, CeroType.santUbaldo);
@@ -134,12 +137,14 @@ void main() {
       });
 
       test('Search Mute by Person', () async {
-        final persona1 = _createDummyPersona('Giovanni', 'Bianchi');
-        final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: [persona1]);
+        final persone1 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        persone1[0] = _createDummyPersona('Giovanni', 'Bianchi');
+        final muta1 = _createDummyMuta(id: 'm1', anno: 2023, cero: CeroType.santUbaldo, persone: persone1);
         await dbHelper.insertMuta(muta1);
 
-        final persona2 = _createDummyPersona('Giovanni', 'Verdi', soprannome: 'Gio');
-        final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: [persona2]);
+        final persone2 = List.generate(8, (i) => _createDummyPersona('Persona', '$i'));
+        persone2[1] = _createDummyPersona('Giovanni', 'Verdi', soprannome: 'Gio');
+        final muta2 = _createDummyMuta(id: 'm2', anno: 2023, cero: CeroType.sanGiorgio, persone: persone2);
         await dbHelper.insertMuta(muta2);
 
         final results = await dbHelper.searchMuteByPerson('Giovanni');

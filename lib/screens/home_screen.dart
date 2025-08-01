@@ -341,31 +341,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showImportExportDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Importa/Esporta Dati'),
-          content: const Text('Vuoi importare o esportare i dati delle mute?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _importData(context);
-              },
-              child: const Text('Importa'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _exportData(context);
-              },
-              child: const Text('Esporta'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

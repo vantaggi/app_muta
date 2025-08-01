@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/theme/theme_provider.dart';
-import 'package:app_muta/widgets/cero_selector.dart';
-import 'package:app_muta/models/muta_model.dart';
-import 'package:app_muta/services/database_helper.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:muta_manager/widgets/cero_selector.dart';
+import 'package:muta_manager/models/muta_model.dart';
+import 'package:muta_manager/services/database_helper.dart';
+import 'package:muta_manager/theme/app_theme.dart';
+import 'package:muta_manager/utils/export_helper.dart';
+import 'package:muta_manager/utils/extensions.dart';
+import 'package:muta_manager/widgets/barella_layout_widget.dart';
 
 class ArchiveScreen extends StatefulWidget {
   const ArchiveScreen({super.key});
@@ -470,9 +473,30 @@ class _MutaDisplayCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${muta.nomeMuta} (${muta.posizione}) - Anno: ${muta.anno}',
-              style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    '${muta.nomeMuta} (${muta.posizione}) - Anno: ${muta.anno}',
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.picture_as_pdf),
+                      onPressed: () => ExportHelper.exportMutaAsPdf(muta),
+                      tooltip: 'Esporta come PDF',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.image),
+                      onPressed: () => ExportHelper.exportMutaAsImage(context, muta, themeProvider),
+                      tooltip: 'Esporta come Immagine',
+                    ),
+                  ],
+                ),
+              ],
             ),
             if (muta.note != null && muta.note!.isNotEmpty)
               Padding(
@@ -480,81 +504,11 @@ class _MutaDisplayCard extends StatelessWidget {
                 child: Text('Note Muta: ${muta.note}', style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black54)),
               ),
             const Divider(height: 15, thickness: 0.5),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Colonna Stanga Sinistra
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Stanga Sinistra', style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      ...RuoloMuta.values.map((ruolo) {
-                        PersonaMuta? p = muta.getPersonaPerRuoloEStanga(ruolo, true);
-                        return _buildPersonaRuoloRow(ruolo, p);
-                      }).toList(),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16), // Spazio tra le stanghe
-                // Colonna Stanga Destra
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Stanga Destra', style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      ...RuoloMuta.values.map((ruolo) {
-                        PersonaMuta? p = muta.getPersonaPerRuoloEStanga(ruolo, false);
-                        return _buildPersonaRuoloRow(ruolo, p);
-                      }).toList(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            BarellaLayoutWidget(muta: muta),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildPersonaRuoloRow(RuoloMuta ruolo, PersonaMuta? persona) {
-    // Formattazione del nome del ruolo per leggibilità (es. "Punta Avanti")
-    String ruoloFormatted = ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0), // Aumentato padding verticale
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$ruoloFormatted:',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5), // Leggermente più grande
-          ),
-          Text(
-            persona?.nomeCompleto ?? '-', // Mostra il nome completo (con soprannome)
-            style: const TextStyle(fontSize: 13.5),
-          ),
-          if (persona?.note != null && persona!.note!.isNotEmpty) // Mostra le note della persona se presenti
-            Padding(
-              padding: const EdgeInsets.only(top: 2.0),
-              child: Text(
-                '(${persona.note})', // Nota specifica della persona
-                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11.5, color: Colors.grey.shade700),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 }
 
-// Estensione per capitalizzare la prima lettera di una stringa
-extension StringExtension on String {
-  String capitalizeFirstLetter() {
-    if (isEmpty) return "";
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
-  }
-}

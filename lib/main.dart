@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/screens/login_screen.dart';
-import 'package:app_muta/theme/theme_provider.dart';
+import 'package:muta_manager/screens/login_screen.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
 
 void main() {
-  runApp(const AppMuta());
+  runApp(const MutaManager());
 }
 
-class AppMuta extends StatelessWidget {
-  const AppMuta({super.key});
+class MutaManager extends StatelessWidget {
+  const MutaManager({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class AppMuta extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'App Muta',
+            title: 'Muta Manager',
             theme: themeProvider.currentTheme,
             debugShowCheckedModeBanner: false,
             home: const LoginScreen(),

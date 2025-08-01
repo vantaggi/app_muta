@@ -1,4 +1,4 @@
-import 'package:app_muta/theme/app_theme.dart'; // Per CeroType
+import 'package:muta_manager/theme/app_theme.dart'; // Per CeroType
 
 // L'enum RuoloMuta definisce la posizione lungo una singola stanga
 enum RuoloMuta {

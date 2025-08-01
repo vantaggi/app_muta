@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/theme/theme_provider.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:muta_manager/theme/app_theme.dart';
 
 class CeroSelector extends StatelessWidget {
   final bool showAsPopup;

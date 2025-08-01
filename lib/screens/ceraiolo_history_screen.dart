@@ -1,7 +1,7 @@
-import 'package:app_muta/models/muta_model.dart';
+import 'package:muta_manager/models/muta_model.dart';
 import 'package:flutter/material.dart';
-import 'package:app_muta/models/ceraiolo_model.dart';
-import 'package:app_muta/services/database_helper.dart';
+import 'package:muta_manager/models/ceraiolo_model.dart';
+import 'package:muta_manager/services/database_helper.dart';
 
 class CeraioloHistoryScreen extends StatefulWidget {
   final Ceraiolo ceraiolo;

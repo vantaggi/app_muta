@@ -168,11 +168,11 @@ class Muta {
       'longitude': longitude,
       'stangaSinistra': stangaSinistra.map((p) => p.toJson()).toList(),
       'stangaDestra': stangaDestra.map((p) => p.toJson()).toList(),
-      'dataCreazione': dataCreazione.millisecondsSinceEpoch,
-      'dataModifica': dataModifica?.millisecondsSinceEpoch,
+      'dataCreazione': dataCreazione.toIso8601String(),
+      'dataModifica': dataModifica?.toIso8601String(),
       'anno': anno,
       'note': note,
-      'verificata': verificata,
+      'verificata': verificata ? 1 : 0,
       'numeroVerifiche': numeroVerifiche,
     };
   }
@@ -191,13 +191,13 @@ class Muta {
       stangaDestra: (json['stangaDestra'] as List)
           .map((p) => PersonaMuta.fromJson(p))
           .toList(),
-      dataCreazione: DateTime.fromMillisecondsSinceEpoch(json['dataCreazione']),
+      dataCreazione: DateTime.parse(json['dataCreazione']),
       dataModifica: json['dataModifica'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['dataModifica'])
+          ? DateTime.parse(json['dataModifica'])
           : null,
       anno: json['anno'],
       note: json['note'],
-      verificata: json['verificata'] ?? false,
+      verificata: json['verificata'] == 1,
       numeroVerifiche: json['numeroVerifiche'] ?? 0,
     );
   }

@@ -88,10 +88,10 @@ CREATE TABLE ceraioli (
     await db.transaction((txn) async {
       await txn.insert('mute', muta.toJson()..remove('stangaSinistra')..remove('stangaDestra'));
       for (var persona in muta.stangaSinistra) {
-        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = true);
+        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = 1);
       }
       for (var persona in muta.stangaDestra) {
-        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = false);
+        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = 0);
       }
     });
   }
@@ -108,8 +108,8 @@ CREATE TABLE ceraioli (
     if (maps.isNotEmpty) {
       final mutaMap = maps.first;
       final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [id]);
-      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
-      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
       return Muta.fromJson({
         ...mutaMap,
@@ -127,8 +127,8 @@ CREATE TABLE ceraioli (
     final muteList = <Muta>[];
     for (var mutaMap in result) {
       final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [mutaMap['id']]);
-      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
-      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
       muteList.add(Muta.fromJson({
         ...mutaMap,
@@ -170,8 +170,8 @@ CREATE TABLE ceraioli (
     final muteList = <Muta>[];
     for (var mutaMap in result) {
       final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [mutaMap['id']]);
-      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
-      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
       muteList.add(Muta.fromJson({
         ...mutaMap,
@@ -193,8 +193,8 @@ CREATE TABLE ceraioli (
     final muteList = <Muta>[];
     for (var mutaMap in muteResult) {
       final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [mutaMap['id']]);
-      final stangaSinistra = personeMaps.where((p) => p['isSinistra'] == 1).map((p) => PersonaMuta.fromJson(p)).toList();
-      final stangaDestra = personeMaps.where((p) => p['isSinistra'] == 0).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
+      final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
       muteList.add(Muta.fromJson({
         ...mutaMap,

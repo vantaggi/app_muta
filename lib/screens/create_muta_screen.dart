@@ -6,11 +6,16 @@ import 'package:app_muta/models/muta_model.dart';
 import 'package:app_muta/services/database_helper.dart';
 import 'package:app_muta/theme/app_theme.dart'; // Per CeroType
 import 'dart:ui' as ui; // Per Image rendering
+import 'package:app_muta/models/ceraiolo_model.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:typed_data'; // Import per ByteData e Uint8List
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class CreateMutaScreen extends StatefulWidget {
   const CreateMutaScreen({super.key});
@@ -71,10 +76,34 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: controllers[0], // Nome
-          decoration: const InputDecoration(labelText: 'Nome', border: OutlineInputBorder(), isDense: true),
-          validator: (value) => (value == null || value.isEmpty) ? 'Richiesto' : null,
+        DropdownSearch<Ceraiolo>(
+          popupProps: PopupProps.menu(
+            showSearchBox: true,
+            isFilterOnline: true,
+            searchFieldProps: TextFieldProps(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                hintText: "Cerca ceraiolo...",
+              ),
+            ),
+          ),
+          dropdownDecoratorProps: DropDownDecoratorProps(
+            dropdownSearchDecoration: InputDecoration(
+              labelText: "Nome",
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+          asyncItems: (String filter) => DatabaseHelper.instance.searchCeraioli(filter),
+          itemAsString: (Ceraiolo c) => c.nomeCompleto,
+          onChanged: (Ceraiolo? data) {
+            if (data != null) {
+              controllers[0].text = data.nome;
+              controllers[1].text = data.cognome;
+              controllers[2].text = data.soprannome ?? '';
+            }
+          },
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -95,42 +124,6 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
       ],
     );
   }
-
-  Widget _buildStangaSection(String titoloStanga, bool isSinistra, ThemeProvider themeProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Text(
-            titoloStanga,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: themeProvider.currentPrimaryColor),
-          ),
-        ),
-        ...RuoloMuta.values.map((ruolo) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            elevation: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter(),
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildPersonaInputFields(ruolo, isSinistra, themeProvider),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ],
-    );
-  }
-
 
   Muta? _collectMutaData(ThemeProvider themeProvider) {
     if (!_formKey.currentState!.validate()) {
@@ -203,10 +196,74 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Chiudi')),
+            TextButton(onPressed: () => _shareWebLink(muta), child: const Text('Share Link')),
+            ElevatedButton(onPressed: () => _exportMutaAsPdf(muta), child: const Text('Esporta PDF')),
           ],
         ),
       );
     }
+  }
+
+  void _shareWebLink(Muta muta) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Condivisione link non ancora implementata.')),
+    );
+  }
+
+  Future<void> _exportMutaAsPdf(Muta muta) async {
+    final pdf = await _generatePdf(muta);
+    await Printing.sharePdf(bytes: pdf, filename: 'muta_${muta.id}.pdf');
+  }
+
+  Future<Uint8List> _generatePdf(Muta muta) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Muta: ${muta.nomeMuta}', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Anno: ${muta.anno}'),
+              pw.Text('Cero: ${muta.ceroNome}'),
+              pw.Text('Posizione: ${muta.posizione}'),
+              pw.SizedBox(height: 20),
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('Stanga Sinistra', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                        ...muta.stangaSinistra.map((p) => pw.Text('${p.ruoloDescrizione}: ${p.nomeCompleto}')),
+                      ],
+                    ),
+                  ),
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('Stanga Destra', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                        ...muta.stangaDestra.map((p) => pw.Text('${p.ruoloDescrizione}: ${p.nomeCompleto}')),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (muta.note != null && muta.note!.isNotEmpty)
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(top: 20),
+                  child: pw.Text('Note: ${muta.note}'),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
   }
 
   Future<void> _saveMuta(ThemeProvider themeProvider) async {
@@ -343,73 +400,120 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
               steps: [
                 Step(
                   title: const Text('Informazioni Muta'),
-                  content: Column(
-                    children: [
-                      TextFormField(
-                        controller: _nomeMutaController,
-                        decoration: const InputDecoration(labelText: 'Nome Muta (es. Muta Ospedale)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.label_important_outline)),
-                        validator: (v) => (v == null || v.isEmpty) ? 'Nome muta richiesto' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start, // Allinea i campi se hanno altezze diverse
+                  content: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
                         children: [
-                          Expanded(
-                            flex: 2,
-                            child: TextFormField(
-                              controller: _posizioneController,
-                              decoration: const InputDecoration(labelText: 'Posizione Geografica', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on_outlined)),
-                              validator: (v) => (v == null || v.isEmpty) ? 'Posizione richiesta' : null,
-                            ),
+                          TextFormField(
+                            controller: _nomeMutaController,
+                            decoration: const InputDecoration(labelText: 'Nome Muta (es. Muta Ospedale)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.label_important_outline)),
+                            validator: (v) => (v == null || v.isEmpty) ? 'Nome muta richiesto' : null,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 1,
-                            child: TextFormField(
-                              controller: _annoController,
-                              decoration: const InputDecoration(labelText: 'Anno', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today_outlined)),
-                              keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (v == null || v.isEmpty) return 'Anno richiesto';
-                                if (int.tryParse(v) == null) return 'Anno non valido';
-                                if (v.length != 4) return 'Formato YYYY'; // Anno a 4 cifre
-                                return null;
-                              },
-                            ),
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _posizioneController,
+                                  decoration: const InputDecoration(labelText: 'Posizione Geografica', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on_outlined)),
+                                  validator: (v) => (v == null || v.isEmpty) ? 'Posizione richiesta' : null,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
+                                child: TextFormField(
+                                  controller: _annoController,
+                                  decoration: const InputDecoration(labelText: 'Anno', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today_outlined)),
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) return 'Anno richiesto';
+                                    if (int.tryParse(v) == null) return 'Anno non valido';
+                                    if (v.length != 4) return 'Formato YYYY';
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _latitudeController,
+                                  decoration: const InputDecoration(labelText: 'Latitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _longitudeController,
+                                  decoration: const InputDecoration(labelText: 'Longitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _latitudeController,
-                              decoration: const InputDecoration(labelText: 'Latitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _longitudeController,
-                              decoration: const InputDecoration(labelText: 'Longitudine', border: OutlineInputBorder(), prefixIcon: Icon(Icons.gps_fixed)),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 Step(
                   title: const Text('Stanga Sinistra'),
-                  content: _buildStangaSection('Stanga Sinistra', true, themeProvider),
+                  content: Column(
+                    children: RuoloMuta.values.map((ruolo) {
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        elevation: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter(),
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildPersonaInputFields(ruolo, true, themeProvider),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 Step(
                   title: const Text('Stanga Destra'),
-                  content: _buildStangaSection('Stanga Destra', false, themeProvider),
+                  content: Column(
+                    children: RuoloMuta.values.map((ruolo) {
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        elevation: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ruolo.toString().split('.').last.replaceAllMapped(RegExp(r'[A-Z]'), (match) => ' ${match.group(0)}').trim().capitalizeFirstLetter(),
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildPersonaInputFields(ruolo, false, themeProvider),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 Step(
                   title: const Text('Note & Salva'),

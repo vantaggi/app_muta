@@ -16,14 +16,6 @@ class MainNavigator extends StatefulWidget {
 class _MainNavigatorState extends State<MainNavigator> {
   int _selectedIndex = 0;
 
-  // Lista delle pagine principali della nostra app
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    MapScreen(),
-    CreateMutaScreen(),
-    ArchiveScreen(),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -34,6 +26,14 @@ class _MainNavigatorState extends State<MainNavigator> {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
+        // Lista delle pagine principali della nostra app
+        final List<Widget> _widgetOptions = <Widget>[
+          const HomeScreen(),
+          const MapScreen(),
+          const CreateMutaScreen(),
+          const ArchiveScreen(),
+        ];
+
         return Scaffold(
           // Il body cambia in base alla selezione nel menu
           body: AnimatedSwitcher(

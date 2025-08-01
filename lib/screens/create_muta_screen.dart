@@ -16,6 +16,8 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:geocoding/geocoding.dart';
+
 
 class CreateMutaScreen extends StatefulWidget {
   const CreateMutaScreen({super.key});
@@ -53,6 +55,7 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
 
   final GlobalKey _renderKey = GlobalKey();
   int _currentStep = 0;
+  bool _isSaving = false;
 
 
   @override
@@ -267,22 +270,75 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
   }
 
   Future<void> _saveMuta(ThemeProvider themeProvider) async {
-    final muta = _collectMutaData(themeProvider);
-    if (muta != null) {
-      try {
+    if (_isSaving) return;
+
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Per favore, correggi gli errori nel form.'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      // Geocoding
+      if (_latitudeController.text.isEmpty && _longitudeController.text.isEmpty && _posizioneController.text.isNotEmpty) {
+        try {
+          final address = '${_posizioneController.text}, Gubbio';
+          final locations = await locationFromAddress(address);
+          if (locations.isNotEmpty) {
+            _latitudeController.text = locations.first.latitude.toString();
+            _longitudeController.text = locations.first.longitude.toString();
+            if(mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Coordinate trovate per l\'indirizzo.'), backgroundColor: Colors.blue),
+              );
+            }
+          } else {
+            throw Exception('No coordinates found');
+          }
+        } catch (e) {
+          if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Indirizzo non trovato: $e'), backgroundColor: Colors.orange),
+            );
+          }
+          // Stop saving if address is not found.
+          setState(() {
+            _isSaving = false;
+          });
+          return;
+        }
+      }
+
+      final muta = _collectMutaData(themeProvider);
+      if (muta != null) {
         await DatabaseHelper.instance.insertMuta(muta);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Muta "${muta.nomeMuta}" salvata con successo!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _resetForm();
-      } catch (e) {
-        print("Errore salvataggio muta: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore durante il salvataggio della muta: $e'), backgroundColor: Colors.red),
-        );
+        if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Muta "${muta.nomeMuta}" salvata con successo!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context, true); // Pop with true on success
+        }
+      }
+    } catch (e) {
+      print("Errore salvataggio muta: $e");
+      if(mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Errore durante il salvataggio della muta: $e'), backgroundColor: Colors.red),
+          );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
       }
     }
   }
@@ -544,13 +600,22 @@ class _CreateMutaScreenState extends State<CreateMutaScreen> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: () => _saveMuta(themeProvider),
+                              onPressed: _isSaving ? null : () => _saveMuta(themeProvider),
                               icon: const Icon(Icons.save_alt_outlined),
-                              label: const Text('Salva Muta'),
+                              label: _isSaving
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : const Text('Salva Muta'),
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: themeProvider.currentPrimaryColor,
                                   foregroundColor: themeProvider.currentPrimaryColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16), // Aumentato padding
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
                               ),
                             ),

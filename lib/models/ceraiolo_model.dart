@@ -28,4 +28,11 @@ class Ceraiolo {
       soprannome: json['soprannome'],
     );
   }
+
+  String get nomeCompleto {
+    if (soprannome != null && soprannome!.isNotEmpty) {
+      return '$nome "$soprannome" $cognome';
+    }
+    return '$nome $cognome';
+  }
 }

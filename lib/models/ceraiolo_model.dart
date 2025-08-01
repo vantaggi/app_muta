@@ -1,14 +1,18 @@
+import 'package:muta_manager/theme/app_theme.dart';
+
 class Ceraiolo {
   final String id;
   final String nome;
   final String cognome;
   final String? soprannome;
+  final CeroType cero;
 
   Ceraiolo({
     required this.id,
     required this.nome,
     required this.cognome,
     this.soprannome,
+    required this.cero,
   });
 
   Map<String, dynamic> toJson() {
@@ -17,6 +21,7 @@ class Ceraiolo {
       'nome': nome,
       'cognome': cognome,
       'soprannome': soprannome,
+      'cero': cero.index,
     };
   }
 
@@ -26,6 +31,7 @@ class Ceraiolo {
       nome: json['nome'],
       cognome: json['cognome'],
       soprannome: json['soprannome'],
+      cero: json['cero'] != null ? CeroType.values[json['cero']] : CeroType.santUbaldo,
     );
   }
 

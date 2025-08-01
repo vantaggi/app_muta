@@ -1,8 +1,8 @@
-import 'package:app_muta/models/ceraiolo_model.dart';
+import 'package:muta_manager/models/ceraiolo_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:app_muta/models/muta_model.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/models/muta_model.dart';
+import 'package:muta_manager/theme/app_theme.dart';
 
 // IMPORTANT NOTE FOR THE DEVELOPER:
 // Since the database schema has been changed, the old database on the device/emulator
@@ -31,7 +31,13 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE ceraioli ADD COLUMN cero INTEGER NOT NULL DEFAULT 0');
+    }
   }
 
   Future _createDB(Database db, int version) async {
@@ -78,7 +84,8 @@ CREATE TABLE ceraioli (
   id $idType,
   nome $textType,
   cognome $textType,
-  soprannome $nullableTextType
+  soprannome $nullableTextType,
+  cero $intType
 )
 ''');
   }
@@ -277,6 +284,12 @@ CREATE TABLE ceraioli (
     }
   }
 
+  Future<List<Ceraiolo>> readAllCeraioliByCero(CeroType cero) async {
+    final db = await instance.database;
+    final result = await db.query('ceraioli', where: 'cero = ?', whereArgs: [cero.index], orderBy: 'cognome ASC, nome ASC');
+    return result.map((json) => Ceraiolo.fromJson(json)).toList();
+  }
+
   Future<List<Ceraiolo>> readAllCeraioli() async {
     final db = await instance.database;
     final result = await db.query('ceraioli', orderBy: 'cognome ASC, nome ASC');
@@ -302,15 +315,26 @@ CREATE TABLE ceraioli (
     );
   }
 
-  Future<List<Ceraiolo>> searchCeraioli(String query) async {
+  Future<List<Ceraiolo>> searchCeraioli(String query, {CeroType? cero}) async {
     final db = await instance.database;
-    if (query.isEmpty) {
-      return [];
+
+    List<String> whereClauses = [];
+    List<dynamic> whereArgs = [];
+
+    if (cero != null) {
+      whereClauses.add('cero = ?');
+      whereArgs.add(cero.index);
     }
+
+    if (query.isNotEmpty) {
+      whereClauses.add('(nome LIKE ? OR cognome LIKE ? OR soprannome LIKE ?)');
+      whereArgs.addAll(['%$query%', '%$query%', '%$query%']);
+    }
+
     final result = await db.query(
       'ceraioli',
-      where: 'nome LIKE ? OR cognome LIKE ? OR soprannome LIKE ?',
-      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      where: whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
       orderBy: 'cognome ASC, nome ASC',
     );
     return result.map((json) => Ceraiolo.fromJson(json)).toList();

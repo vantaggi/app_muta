@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
   CeroType _currentCero = CeroType.santUbaldo; // Cero di default

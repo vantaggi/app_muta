@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app_muta/screens/main_navigator.dart';
+import 'package:muta_manager/screens/main_navigator.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               const Spacer(flex: 2),
               Text(
-                'Benvenuto in App Muta',
+                'Benvenuto in Muta Manager',
                 textAlign: TextAlign.center,
                 style: textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,

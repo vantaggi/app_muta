@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/screens/login_screen.dart';
-import 'package:app_muta/theme/theme_provider.dart';
+import 'package:muta_manager/screens/login_screen.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
 
 void main() {
   runApp(const AppMuta());

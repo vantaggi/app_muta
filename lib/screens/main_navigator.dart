@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/screens/home_screen.dart';
-import 'package:app_muta/screens/map_screen.dart';
-import 'package:app_muta/screens/create_muta_screen.dart';
-import 'package:app_muta/screens/archive_screen.dart';
-import 'package:app_muta/theme/theme_provider.dart';
+import 'package:muta_manager/screens/home_screen.dart';
+import 'package:muta_manager/screens/map_screen.dart';
+import 'package:muta_manager/screens/create_muta_screen.dart';
+import 'package:muta_manager/screens/archive_screen.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
 
 class MainNavigator extends StatefulWidget {
   const MainNavigator({super.key});

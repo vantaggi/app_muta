@@ -1,15 +1,15 @@
-import 'package:app_muta/screens/ceraioli_screen.dart';
+import 'package:muta_manager/screens/ceraioli_screen.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:app_muta/services/database_helper.dart';
-import 'package:app_muta/theme/app_theme.dart';
+import 'package:muta_manager/services/database_helper.dart';
+import 'package:muta_manager/theme/app_theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:app_muta/theme/theme_provider.dart';
-import 'package:app_muta/widgets/cero_selector.dart';
-import 'package:app_muta/models/muta_model.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:muta_manager/widgets/cero_selector.dart';
+import 'package:muta_manager/models/muta_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, themeProvider, child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('App Muta - ${themeProvider.currentCeroName}'),
+            title: Text('Muta Manager - ${themeProvider.currentCeroName}'),
             actions: [
               IconButton(
                 icon: Icon(themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode),

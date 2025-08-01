@@ -1,7 +1,9 @@
-import 'package:app_muta/screens/ceraiolo_history_screen.dart';
+import 'package:muta_manager/screens/ceraiolo_history_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:app_muta/models/ceraiolo_model.dart';
-import 'package:app_muta/services/database_helper.dart';
+import 'package:muta_manager/models/ceraiolo_model.dart';
+import 'package:muta_manager/services/database_helper.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CeraioliScreen extends StatefulWidget {
@@ -70,6 +72,7 @@ class _CeraioliScreenState extends State<CeraioliScreen> {
             ElevatedButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
+                  final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
                   final newCeraiolo = Ceraiolo(
                     id: isEditing ? ceraiolo.id : const Uuid().v4(),
                     nome: _nomeController.text,
@@ -77,6 +80,7 @@ class _CeraioliScreenState extends State<CeraioliScreen> {
                     soprannome: _soprannomeController.text.isNotEmpty
                         ? _soprannomeController.text
                         : null,
+                    cero: isEditing ? ceraiolo.cero : themeProvider.currentCero,
                   );
                   if (isEditing) {
                     await DatabaseHelper.instance.updateCeraiolo(newCeraiolo);

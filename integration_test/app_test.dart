@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:app_muta/main.dart' as app;
+import 'package:muta_manager/main.dart' as app;
 import 'package:provider/provider.dart';
-import 'package:app_muta/theme/theme_provider.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

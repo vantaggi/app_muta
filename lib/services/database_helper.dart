@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:muta_manager/models/ceraiolo_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,50 @@ class DatabaseHelper {
   static DatabaseHelper? _instance;
   static final DatabaseHelper instance = _instance ??= DatabaseHelper._init();
   static Database? _database;
+
+  // Web-only in-memory storage fallback with sample data
+  static final List<Muta> _webMute = [
+    Muta.validateAndCreate(
+      id: 'm1',
+      cero: CeroType.santUbaldo,
+      nomeMuta: 'Calata dei Neri',
+      posizione: 'Calata dei Neri',
+      latitude: 43.3524,
+      longitude: 12.5786,
+      stangaSinistra: [
+        PersonaMuta(nome: 'Roberto', cognome: 'Rossi', soprannome: 'Bebbo', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Francesco', cognome: 'Bianchi', soprannome: 'Checco', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Lorenzo', cognome: 'Verdi', soprannome: 'Lollo', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Giovanni', cognome: 'Neri', soprannome: 'Gianni', ruolo: RuoloMuta.puntaDietro),
+      ],
+      stangaDestra: [
+        PersonaMuta(nome: 'Pietro', cognome: 'Gialli', soprannome: 'Piero', ruolo: RuoloMuta.puntaAvanti),
+        PersonaMuta(nome: 'Giacomo', cognome: 'Marroni', soprannome: 'Jack', ruolo: RuoloMuta.ceppoAvanti),
+        PersonaMuta(nome: 'Filippo', cognome: 'Grigi', soprannome: 'Fil', ruolo: RuoloMuta.ceppoDietro),
+        PersonaMuta(nome: 'Matteo', cognome: 'Azzurri', soprannome: 'Matt', ruolo: RuoloMuta.puntaDietro),
+      ],
+      dataCreazione: DateTime.now(),
+      anno: 2026,
+      note: 'Muta storica della Calata dei Neri',
+      verificata: true,
+      numeroVerifiche: 3,
+    )
+  ];
+
+  static final List<Ceraiolo> _webCeraioli = [
+    Ceraiolo(id: 'c1', nome: 'Roberto', cognome: 'Rossi', soprannome: 'Bebbo', cero: CeroType.santUbaldo),
+    Ceraiolo(id: 'c2', nome: 'Francesco', cognome: 'Bianchi', soprannome: 'Checco', cero: CeroType.santUbaldo),
+    Ceraiolo(id: 'c3', nome: 'Lorenzo', cognome: 'Verdi', soprannome: 'Lollo', cero: CeroType.santUbaldo),
+    Ceraiolo(id: 'c4', nome: 'Giovanni', cognome: 'Neri', soprannome: 'Gianni', cero: CeroType.santUbaldo),
+    Ceraiolo(id: 'c5', nome: 'Michele', cognome: 'Fiorucci', soprannome: 'Miki', cero: CeroType.sanGiorgio),
+    Ceraiolo(id: 'c6', nome: 'Andrea', cognome: 'Uccellani', soprannome: 'Kino', cero: CeroType.sanGiorgio),
+    Ceraiolo(id: 'c7', nome: 'Filippo', cognome: 'Gini', soprannome: 'Pippo', cero: CeroType.sanGiorgio),
+    Ceraiolo(id: 'c8', nome: 'Matteo', cognome: 'Bazzurri', soprannome: 'Teo', cero: CeroType.sanGiorgio),
+    Ceraiolo(id: 'c9', nome: 'Giuseppe', cognome: 'Radicchi', soprannome: 'Peppe', cero: CeroType.santAntonio),
+    Ceraiolo(id: 'c10', nome: 'Claudio', cognome: 'Sannipoli', soprannome: 'Icio', cero: CeroType.santAntonio),
+    Ceraiolo(id: 'c11', nome: 'Marco', cognome: 'Minelli', soprannome: 'Killa', cero: CeroType.santAntonio),
+    Ceraiolo(id: 'c12', nome: 'David', cognome: 'Fioriti', soprannome: 'Dada', cero: CeroType.santAntonio),
+  ];
 
   DatabaseHelper._init();
 
@@ -89,6 +134,11 @@ CREATE TABLE ceraioli (
   }
 
   Future<void> insertMuta(Muta muta) async {
+    if (kIsWeb) {
+      _webMute.removeWhere((m) => m.id == muta.id);
+      _webMute.add(muta);
+      return;
+    }
     final db = await instance.database;
     await db.transaction((txn) async {
       await txn.insert('mute', muta.toSqliteMap());
@@ -108,6 +158,9 @@ CREATE TABLE ceraioli (
   }
 
   Future<Muta> readMuta(String id) async {
+    if (kIsWeb) {
+      return _webMute.firstWhere((m) => m.id == id, orElse: () => throw Exception('ID $id not found'));
+    }
     final db = await instance.database;
     final maps = await db.query(
       'mute',
@@ -151,6 +204,9 @@ CREATE TABLE ceraioli (
   }
 
   Future<List<Muta>> readAllMute() async {
+    if (kIsWeb) {
+      return List<Muta>.from(_webMute);
+    }
     final db = await instance.database;
     final result = await db.query('mute');
     final muteList = <Muta>[];
@@ -180,6 +236,11 @@ CREATE TABLE ceraioli (
   }
 
   Future<void> updateMuta(Muta muta) async {
+    if (kIsWeb) {
+      _webMute.removeWhere((m) => m.id == muta.id);
+      _webMute.add(muta);
+      return;
+    }
     final db = await instance.database;
     await db.transaction((txn) async {
       await txn.update(
@@ -211,6 +272,10 @@ CREATE TABLE ceraioli (
   }
 
   Future<int> deleteMuta(String id) async {
+    if (kIsWeb) {
+      _webMute.removeWhere((m) => m.id == id);
+      return 1;
+    }
     final db = await instance.database;
     return await db.delete(
       'mute',
@@ -220,12 +285,18 @@ CREATE TABLE ceraioli (
   }
 
   Future<List<int>> getAvailableYears() async {
+    if (kIsWeb) {
+      return _webMute.map((m) => m.anno).toSet().toList();
+    }
     final db = await instance.database;
     final result = await db.query('mute', columns: ['anno'], distinct: true);
     return result.map((map) => map['anno'] as int).toList();
   }
 
   Future<List<Muta>> readMuteByYearAndCero(int year, CeroType cero) async {
+    if (kIsWeb) {
+      return _webMute.where((m) => m.anno == year && m.cero == cero).toList();
+    }
     final db = await instance.database;
     final result = await db.query('mute', where: 'anno = ? AND cero = ?', whereArgs: [year, cero.index]);
     final muteList = <Muta>[];
@@ -255,6 +326,13 @@ CREATE TABLE ceraioli (
   }
 
   Future<List<Muta>> searchMuteByPerson(String query) async {
+    if (kIsWeb) {
+      final q = query.toLowerCase();
+      return _webMute.where((m) {
+        return m.stangaSinistra.any((p) => p.nome.toLowerCase().contains(q) || p.cognome.toLowerCase().contains(q) || (p.soprannome?.toLowerCase().contains(q) ?? false)) ||
+               m.stangaDestra.any((p) => p.nome.toLowerCase().contains(q) || p.cognome.toLowerCase().contains(q) || (p.soprannome?.toLowerCase().contains(q) ?? false));
+      }).toList();
+    }
     final db = await instance.database;
     final personeResult = await db.query('persone', where: 'nome LIKE ? OR cognome LIKE ? OR soprannome LIKE ?', whereArgs: ['%$query%', '%$query%', '%$query%']);
     final mutaIds = personeResult.map((map) => map['mutaId'] as String).toSet();
@@ -289,16 +367,25 @@ CREATE TABLE ceraioli (
   }
 
   Future close() async {
+    if (kIsWeb) return;
     final db = await instance.database;
     db.close();
   }
 
   Future<void> insertCeraiolo(Ceraiolo ceraiolo) async {
+    if (kIsWeb) {
+      _webCeraioli.removeWhere((c) => c.id == ceraiolo.id);
+      _webCeraioli.add(ceraiolo);
+      return;
+    }
     final db = await instance.database;
     await db.insert('ceraioli', ceraiolo.toJson());
   }
 
   Future<Ceraiolo> readCeraiolo(String id) async {
+    if (kIsWeb) {
+      return _webCeraioli.firstWhere((c) => c.id == id, orElse: () => throw Exception('ID $id not found in ceraioli registry'));
+    }
     final db = await instance.database;
     final maps = await db.query(
       'ceraioli',
@@ -315,18 +402,41 @@ CREATE TABLE ceraioli (
   }
 
   Future<List<Ceraiolo>> readAllCeraioliByCero(CeroType cero) async {
+    if (kIsWeb) {
+      final res = _webCeraioli.where((c) => c.cero == cero).toList();
+      res.sort((a, b) {
+        int cmp = a.cognome.compareTo(b.cognome);
+        if (cmp != 0) return cmp;
+        return a.nome.compareTo(b.nome);
+      });
+      return res;
+    }
     final db = await instance.database;
     final result = await db.query('ceraioli', where: 'cero = ?', whereArgs: [cero.index], orderBy: 'cognome ASC, nome ASC');
     return result.map((json) => Ceraiolo.fromJson(json)).toList();
   }
 
   Future<List<Ceraiolo>> readAllCeraioli() async {
+    if (kIsWeb) {
+      final res = List<Ceraiolo>.from(_webCeraioli);
+      res.sort((a, b) {
+        int cmp = a.cognome.compareTo(b.cognome);
+        if (cmp != 0) return cmp;
+        return a.nome.compareTo(b.nome);
+      });
+      return res;
+    }
     final db = await instance.database;
     final result = await db.query('ceraioli', orderBy: 'cognome ASC, nome ASC');
     return result.map((json) => Ceraiolo.fromJson(json)).toList();
   }
 
   Future<int> updateCeraiolo(Ceraiolo ceraiolo) async {
+    if (kIsWeb) {
+      _webCeraioli.removeWhere((c) => c.id == ceraiolo.id);
+      _webCeraioli.add(ceraiolo);
+      return 1;
+    }
     final db = await instance.database;
     return db.update(
       'ceraioli',
@@ -337,6 +447,10 @@ CREATE TABLE ceraioli (
   }
 
   Future<int> deleteCeraiolo(String id) async {
+    if (kIsWeb) {
+      _webCeraioli.removeWhere((c) => c.id == id);
+      return 1;
+    }
     final db = await instance.database;
     return await db.delete(
       'ceraioli',
@@ -346,6 +460,22 @@ CREATE TABLE ceraioli (
   }
 
   Future<List<Ceraiolo>> searchCeraioli(String query, {CeroType? cero}) async {
+    if (kIsWeb) {
+      var res = _webCeraioli;
+      if (cero != null) {
+        res = res.where((c) => c.cero == cero).toList();
+      }
+      if (query.isNotEmpty) {
+        final q = query.toLowerCase();
+        res = res.where((c) => c.nome.toLowerCase().contains(q) || c.cognome.toLowerCase().contains(q) || (c.soprannome?.toLowerCase().contains(q) ?? false)).toList();
+      }
+      res.sort((a, b) {
+        int cmp = a.cognome.compareTo(b.cognome);
+        if (cmp != 0) return cmp;
+        return a.nome.compareTo(b.nome);
+      });
+      return res;
+    }
     final db = await instance.database;
 
     List<String> whereClauses = [];

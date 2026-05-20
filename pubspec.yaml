@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2
   sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
   path_provider: ^2.1.1
   share_plus: ^7.2.1
   google_maps_flutter: ^2.5.0
@@ -57,7 +58,6 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  sqflite_common_ffi: ^2.3.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

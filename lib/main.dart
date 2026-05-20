@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:muta_manager/screens/login_screen.dart';
 import 'package:muta_manager/theme/theme_provider.dart';
 import 'package:muta_manager/providers/app_state_provider.dart';
 
 void main() {
+  if (!kIsWeb) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(const MutaManager());
 }
 

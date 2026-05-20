@@ -118,10 +118,10 @@ class BarellaLayoutWidget extends StatelessWidget {
                       text: TextSpan(
                         style: Theme.of(context).textTheme.labelLarge,
                         children: [
-                          TextSpan(text: '\${persona.nome} '),
+                          TextSpan(text: '${persona.nome} '),
                           if (persona.soprannome != null && persona.soprannome!.isNotEmpty)
                             TextSpan(
-                              text: '"\${persona.soprannome}" ',
+                              text: '"${persona.soprannome}" ',
                               style: const TextStyle(fontStyle: FontStyle.italic),
                             ),
                           TextSpan(text: persona.cognome),

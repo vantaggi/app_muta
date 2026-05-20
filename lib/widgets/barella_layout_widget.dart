@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:muta_manager/models/muta_model.dart';
+import 'package:muta_manager/theme/app_theme.dart';
+import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
+import 'dart:ui';
 
 class BarellaLayoutWidget extends StatelessWidget {
   final Muta muta;
@@ -8,67 +12,199 @@ class BarellaLayoutWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final height = width * 0.5; // Aspect ratio for the stretcher
-
-        return Container(
-          width: width,
-          height: height,
-          child: Stack(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingMd),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Stretcher body
-              Center(
-                child: Container(
-                  width: width * 0.8,
-                  height: height * 0.6,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                      width: 2,
-                    ),
-                  ),
-                ),
+              Expanded(
+                child: _buildStangaColumn(context, true),
               ),
-              // Stanga Sinistra
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.puntaAvanti, true), top: 0, left: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.ceppoAvanti, true), top: height * 0.3, left: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.ceppoDietro, true), top: height * 0.7, left: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.puntaDietro, true), bottom: 0, left: 0),
-              // Stanga Destra
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.puntaAvanti, false), top: 0, right: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.ceppoAvanti, false), top: height * 0.3, right: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.ceppoDietro, false), top: height * 0.7, right: 0),
-              _buildParticipant(context, muta.getPersonaPerRuoloEStanga(RuoloMuta.puntaDietro, false), bottom: 0, right: 0),
+              const SizedBox(width: AppTheme.spacingMd),
+              Expanded(
+                child: _buildStangaColumn(context, false),
+              ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget _buildParticipant(BuildContext context, PersonaMuta? persona, {double? top, double? bottom, double? left, double? right}) {
-    return Positioned(
-      top: top,
-      bottom: bottom,
-      left: left,
-      right: right,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(4),
+  Widget _buildStangaColumn(BuildContext context, bool isSinistra) {
+    final title = isSinistra ? 'Stanga Sinistra' : 'Stanga Destra';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppTheme.spacingSm),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
         ),
+        _buildSlot(context, RuoloMuta.puntaAvanti, isSinistra),
+        const SizedBox(height: AppTheme.spacingSm),
+        _buildSlot(context, RuoloMuta.ceppoAvanti, isSinistra),
+        const SizedBox(height: AppTheme.spacingSm),
+        _buildSlot(context, RuoloMuta.ceppoDietro, isSinistra),
+        const SizedBox(height: AppTheme.spacingSm),
+        _buildSlot(context, RuoloMuta.puntaDietro, isSinistra),
+      ],
+    );
+  }
+
+  Widget _buildSlot(BuildContext context, RuoloMuta ruolo, bool isSinistra) {
+    final persona = muta.getPersonaPerRuoloEStanga(ruolo, isSinistra);
+
+    if (persona == null) {
+      return _buildEmptySlot(context, ruolo);
+    }
+    return _buildFilledSlot(context, persona);
+  }
+
+  Widget _buildEmptySlot(BuildContext context, RuoloMuta ruolo) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark ? Colors.white38 : Colors.black38;
+
+    return CustomPaint(
+      painter: _DashedRectPainter(color: color, strokeWidth: 1.5, gap: 4.0),
+      child: Container(
+        height: 80, // Increased height slightly
+        alignment: Alignment.center,
         child: Text(
-          persona?.nomeCompleto ?? 'N/A',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+          _getRuoloLabel(ruolo),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: color,
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildFilledSlot(BuildContext context, PersonaMuta persona) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      height: 80, // Increased height slightly
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: AppTheme.microBorderRadius,
+        boxShadow: AppTheme.ambientShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: AppTheme.microBorderRadius,
+        child: Row(
+          children: [
+            Container(
+              width: 6,
+              color: themeProvider.currentPrimaryColor,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: AppTheme.spacingSm),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    RichText(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.labelLarge,
+                        children: [
+                          TextSpan(text: '\${persona.nome} '),
+                          if (persona.soprannome != null && persona.soprannome!.isNotEmpty)
+                            TextSpan(
+                              text: '"\${persona.soprannome}" ',
+                              style: const TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          TextSpan(text: persona.cognome),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      persona.ruoloDescrizione,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (persona.note != null && persona.note!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2.0),
+                        child: Text(
+                          persona.note!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getRuoloLabel(RuoloMuta ruolo) {
+    switch (ruolo) {
+      case RuoloMuta.puntaAvanti: return 'Punta Avanti';
+      case RuoloMuta.ceppoAvanti: return 'Ceppo Avanti';
+      case RuoloMuta.ceppoDietro: return 'Ceppo Dietro';
+      case RuoloMuta.puntaDietro: return 'Punta Dietro';
+    }
+  }
+}
+
+class _DashedRectPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double gap;
+
+  _DashedRectPainter({this.color = Colors.black, this.strokeWidth = 1.0, this.gap = 5.0});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final Path path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          const Radius.circular(12.0)));
+
+    Path dashPath = Path();
+
+    double distance = 0.0;
+    for (PathMetric pathMetric in path.computeMetrics()) {
+      while (distance < pathMetric.length) {
+        dashPath.addPath(
+            pathMetric.extractPath(distance, distance + gap), Offset.zero);
+        distance += gap * 2;
+      }
+      distance = 0.0;
+    }
+
+    canvas.drawPath(dashPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

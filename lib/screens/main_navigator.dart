@@ -28,7 +28,7 @@ class _MainNavigatorState extends State<MainNavigator> {
       builder: (context, themeProvider, child) {
         // Lista delle pagine principali della nostra app
         final List<Widget> _widgetOptions = <Widget>[
-          const HomeScreen(),
+          HomeScreen(onTabSelected: _onItemTapped),
           const MapScreen(),
           const CreateMutaScreen(),
           const ArchiveScreen(),

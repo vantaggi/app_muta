@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:muta_manager/screens/login_screen.dart';
 import 'package:muta_manager/theme/theme_provider.dart';
+import 'package:muta_manager/providers/app_state_provider.dart';
 
 void main() {
   runApp(const MutaManager());
@@ -12,8 +13,15 @@ class MutaManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (context) => ThemeProvider(),
+        ),
+        ChangeNotifierProvider<AppStateProvider>(
+          create: (context) => AppStateProvider(),
+        ),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(

@@ -27,11 +27,15 @@ class Ceraiolo {
 
   factory Ceraiolo.fromJson(Map<String, dynamic> json) {
     return Ceraiolo(
-      id: json['id'],
-      nome: json['nome'],
-      cognome: json['cognome'],
-      soprannome: json['soprannome'],
-      cero: json['cero'] != null ? CeroType.values[json['cero']] : CeroType.santUbaldo,
+      id: json['id']?.toString() ?? '',
+      nome: json['nome']?.toString() ?? '',
+      cognome: json['cognome']?.toString() ?? '',
+      soprannome: json['soprannome']?.toString(),
+      cero: json['cero'] != null
+          ? (json['cero'] >= 0 && json['cero'] < CeroType.values.length
+              ? CeroType.values[json['cero']]
+              : CeroType.santUbaldo)
+          : CeroType.santUbaldo,
     );
   }
 
@@ -40,5 +44,21 @@ class Ceraiolo {
       return '$nome "$soprannome" $cognome';
     }
     return '$nome $cognome';
+  }
+
+  String get ceroDescrizione {
+    switch (cero) {
+      case CeroType.santUbaldo:
+        return "Sant'Ubaldo";
+      case CeroType.sanGiorgio:
+        return "San Giorgio";
+      case CeroType.santAntonio:
+        return "Sant'Antonio";
+    }
+  }
+
+  @override
+  String toString() {
+    return '$nomeCompleto (Cero: $ceroDescrizione)';
   }
 }

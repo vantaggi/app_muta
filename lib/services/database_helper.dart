@@ -4,11 +4,6 @@ import 'package:path/path.dart';
 import 'package:muta_manager/models/muta_model.dart';
 import 'package:muta_manager/theme/app_theme.dart';
 
-// IMPORTANT NOTE FOR THE DEVELOPER:
-// Since the database schema has been changed, the old database on the device/emulator
-// must be deleted for the changes to take effect.
-// Please UNINSTALL the app completely from your test device and then run it again.
-// This will trigger the `onCreate` method with the new, corrected schema.
 class DatabaseHelper {
   static DatabaseHelper? _instance;
   static final DatabaseHelper instance = _instance ??= DatabaseHelper._init();
@@ -31,13 +26,22 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 2, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDB,
+      onConfigure: _onConfigure,
+    );
+  }
+
+  Future _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON;');
   }
 
   Future _createDB(Database db, int version) async {
     const idType = 'TEXT PRIMARY KEY';
     const textType = 'TEXT NOT NULL';
-    const nullableTextType = 'TEXT'; // For nullable text columns
+    const nullableTextType = 'TEXT';
     const intType = 'INTEGER NOT NULL';
     const boolType = 'BOOLEAN NOT NULL';
     const realType = 'REAL';
@@ -87,12 +91,18 @@ CREATE TABLE ceraioli (
   Future<void> insertMuta(Muta muta) async {
     final db = await instance.database;
     await db.transaction((txn) async {
-      await txn.insert('mute', muta.toJson()..remove('stangaSinistra')..remove('stangaDestra'));
+      await txn.insert('mute', muta.toSqliteMap());
       for (var persona in muta.stangaSinistra) {
-        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = 1);
+        final Map<String, dynamic> personMap = persona.toJson();
+        personMap['mutaId'] = muta.id;
+        personMap['isSinistra'] = 1;
+        await txn.insert('persone', personMap);
       }
       for (var persona in muta.stangaDestra) {
-        await txn.insert('persone', persona.toJson()..['mutaId'] = muta.id..['isSinistra'] = 0);
+        final Map<String, dynamic> personMap = persona.toJson();
+        personMap['mutaId'] = muta.id;
+        personMap['isSinistra'] = 0;
+        await txn.insert('persone', personMap);
       }
     });
   }
@@ -101,7 +111,6 @@ CREATE TABLE ceraioli (
     final db = await instance.database;
     final maps = await db.query(
       'mute',
-      columns: ['id', 'cero', 'nomeMuta', 'posizione', 'latitude', 'longitude', 'dataCreazione', 'dataModifica', 'anno', 'note', 'verificata', 'numeroVerifiche'],
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -109,10 +118,18 @@ CREATE TABLE ceraioli (
     if (maps.isNotEmpty) {
       final mutaMap = maps.first;
       final personeMaps = await db.query('persone', where: 'mutaId = ?', whereArgs: [id]);
-      final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
-      final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      return Muta(
+      final stangaSinistra = personeMaps
+          .where((p) => (p['isSinistra'] as int) == 1)
+          .map((p) => PersonaMuta.fromJson(p))
+          .toList();
+
+      final stangaDestra = personeMaps
+          .where((p) => (p['isSinistra'] as int) == 0)
+          .map((p) => PersonaMuta.fromJson(p))
+          .toList();
+
+      return Muta.validateAndCreate(
         id: mutaMap['id'] as String,
         cero: CeroType.values[mutaMap['cero'] as int],
         nomeMuta: mutaMap['nomeMuta'] as String,
@@ -142,7 +159,7 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta(
+      muteList.add(Muta.validateAndCreate(
         id: mutaMap['id'] as String,
         cero: CeroType.values[mutaMap['cero'] as int],
         nomeMuta: mutaMap['nomeMuta'] as String,
@@ -162,14 +179,35 @@ CREATE TABLE ceraioli (
     return muteList;
   }
 
-  Future<int> updateMuta(Muta muta) async {
+  Future<void> updateMuta(Muta muta) async {
     final db = await instance.database;
-    return db.update(
-      'mute',
-      muta.toJson(),
-      where: 'id = ?',
-      whereArgs: [muta.id],
-    );
+    await db.transaction((txn) async {
+      await txn.update(
+        'mute',
+        muta.toSqliteMap(),
+        where: 'id = ?',
+        whereArgs: [muta.id],
+      );
+
+      await txn.delete(
+        'persone',
+        where: 'mutaId = ?',
+        whereArgs: [muta.id],
+      );
+
+      for (var persona in muta.stangaSinistra) {
+        final Map<String, dynamic> personMap = persona.toJson();
+        personMap['mutaId'] = muta.id;
+        personMap['isSinistra'] = 1;
+        await txn.insert('persone', personMap);
+      }
+      for (var persona in muta.stangaDestra) {
+        final Map<String, dynamic> personMap = persona.toJson();
+        personMap['mutaId'] = muta.id;
+        personMap['isSinistra'] = 0;
+        await txn.insert('persone', personMap);
+      }
+    });
   }
 
   Future<int> deleteMuta(String id) async {
@@ -196,7 +234,7 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta(
+      muteList.add(Muta.validateAndCreate(
         id: mutaMap['id'] as String,
         cero: CeroType.values[mutaMap['cero'] as int],
         nomeMuta: mutaMap['nomeMuta'] as String,
@@ -230,7 +268,7 @@ CREATE TABLE ceraioli (
       final stangaSinistra = personeMaps.where((p) => (p['isSinistra'] as int) == 1).map((p) => PersonaMuta.fromJson(p)).toList();
       final stangaDestra = personeMaps.where((p) => (p['isSinistra'] as int) == 0).map((p) => PersonaMuta.fromJson(p)).toList();
 
-      muteList.add(Muta(
+      muteList.add(Muta.validateAndCreate(
         id: mutaMap['id'] as String,
         cero: CeroType.values[mutaMap['cero'] as int],
         nomeMuta: mutaMap['nomeMuta'] as String,
@@ -255,8 +293,6 @@ CREATE TABLE ceraioli (
     db.close();
   }
 
-  // Ceraioli CRUD Methods
-
   Future<void> insertCeraiolo(Ceraiolo ceraiolo) async {
     final db = await instance.database;
     await db.insert('ceraioli', ceraiolo.toJson());
@@ -266,7 +302,7 @@ CREATE TABLE ceraioli (
     final db = await instance.database;
     final maps = await db.query(
       'ceraioli',
-      columns: ['id', 'nome', 'cognome', 'soprannome'],
+      columns: ['id', 'nome', 'cognome', 'soprannome', 'cero'],
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -274,7 +310,7 @@ CREATE TABLE ceraioli (
     if (maps.isNotEmpty) {
       return Ceraiolo.fromJson(maps.first);
     } else {
-      throw Exception('ID $id not found');
+      throw Exception('ID $id not found in ceraioli registry');
     }
   }
 

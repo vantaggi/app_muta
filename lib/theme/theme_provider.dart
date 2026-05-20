@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:muta_manager/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  CeroType _currentCero = CeroType.santUbaldo; // Cero di default
+  CeroType _currentCero = CeroType.santUbaldo; // Default Cero
   bool _isDarkMode = false;
 
   CeroType get currentCero => _currentCero;
@@ -26,7 +26,6 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Cambia il cero e notifica tutti i listener
   void changeCero(CeroType newCero) {
     if (_currentCero != newCero) {
       _currentCero = newCero;
@@ -34,7 +33,6 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Metodo per ciclare tra i ceri (utile per test)
   void cycleCero() {
     switch (_currentCero) {
       case CeroType.santUbaldo:
@@ -49,27 +47,18 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Ottieni l'icona rappresentativa del cero
   IconData get currentCeroIcon {
     switch (_currentCero) {
       case CeroType.santUbaldo:
-        return Icons.star; // Simbolo per Sant'Ubaldo
+        return Icons.star;
       case CeroType.sanGiorgio:
-        return Icons.shield; // Simbolo per San Giorgio
+        return Icons.shield;
       case CeroType.santAntonio:
-        return Icons.local_fire_department; // Simbolo per Sant'Antonio
+        return Icons.local_fire_department;
     }
   }
 
-  // Ottieni il colore primario del cero corrente
   Color get currentPrimaryColor {
-    switch (_currentCero) {
-      case CeroType.santUbaldo:
-        return Colors.yellow.shade700;
-      case CeroType.sanGiorgio:
-        return Colors.blue.shade700;
-      case CeroType.santAntonio:
-        return Colors.black;
-    }
+    return AppTheme.getPrimaryColor(_currentCero);
   }
 }
